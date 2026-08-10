@@ -90,7 +90,7 @@
             box-shadow: 0 8px 30px var(--accent-glow);
         }
 
-        /* Tarot Section Enhanced */
+        /* Tarot Section */
         .tarot-wrapper {
             text-align: center;
             perspective: 1000px;
@@ -303,7 +303,6 @@
             <p class="subtitle">Astro & Tarot Konzultace</p>
         </header>
 
-        <!-- Tarot Section -->
         <div class="card-box tarot-wrapper">
             <h2 class="service-title" style="font-size: 1.4rem;">Osobní karta pro dnešní den</h2>
             <div class="tarot-card" id="tarot-card-box">
@@ -314,7 +313,6 @@
             <button onclick="drawCard()" style="max-width: 250px;">Táhnout kartu</button>
         </div>
 
-        <!-- Services Section -->
         <h2 class="section-title">Nabídka Služeb</h2>
         <div class="services-grid">
             {% for key, service in services.items() %}
@@ -331,7 +329,6 @@
             {% endfor %}
         </div>
 
-        <!-- Reservation Section -->
         <h2 class="section-title" id="reservation-title">Rezervace Termínu</h2>
         <div class="card-box">
             <form id="reservation-form">
@@ -353,17 +350,17 @@
         </div>
     </div>
 
-    <!-- Modal window for QR Code -->
     <div id="qr-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <h2 id="modal-title" class="service-title"></h2>
             <p id="modal-price" class="service-price" style="margin-top: 5px;"></p>
             <div id="modal-qr-container"></div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">
-                IBAN: <code id="modal-iban"></code><br>
-                Variabilní symbol: <code id="modal-vs"></code>
-            </p>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px; text-align: left; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
+                <p><strong>IBAN:</strong> <code id="modal-iban"></code></p>
+                <p style="margin-top: 4px;"><strong>BIC / SWIFT:</strong> <code id="modal-bic"></code></p>
+                <p style="margin-top: 4px;"><strong>Variabilní symbol:</strong> <code id="modal-vs"></code></p>
+            </div>
         </div>
     </div>
 
@@ -407,6 +404,7 @@
                 document.getElementById('modal-price').innerText = data.price;
                 document.getElementById('modal-qr-container').innerHTML = `<img src="${data.qr_image}" class="qr-img" alt="QR kód">`;
                 document.getElementById('modal-iban').innerText = data.iban;
+                document.getElementById('modal-bic').innerText = data.bic;
                 document.getElementById('modal-vs').innerText = data.vs;
 
                 document.getElementById('qr-modal').style.display = 'flex';
@@ -416,16 +414,12 @@
         }
 
         function selectAndPay(serviceId) {
-            // Predvybrani sluzby ve formulari
             const serviceSelect = document.getElementById('res-service');
             if (serviceSelect) {
                 serviceSelect.value = serviceId;
             }
 
-            // Plynuly posun k rezervacnimu kalendari / formulari
             document.getElementById('reservation-title').scrollIntoView({ behavior: 'smooth' });
-
-            // Zobrazeni QR modal okna
             generateQR(serviceId);
         }
 
