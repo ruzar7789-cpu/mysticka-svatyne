@@ -1,14 +1,15 @@
-from flask import Flask, render_template, request, jsonify
-import qrcode
 import io
 import base64
 import random
 import os
+from flask import Flask, render_template, request, jsonify
+import qrcode
 import resend
 
 app = Flask(__name__, template_folder='../templates')
 
 REVOLUT_IBAN = "LT803250069633761109"
+REVOLUT_BIC = "REVOLT21"
 ADMIN_EMAIL = "ruzar7789@gmail.com"
 
 resend.api_key = os.getenv("RESEND_API_KEY", "")
@@ -89,8 +90,10 @@ def generate_qr():
     message = service['title'][:35]
     vs = str(random.randint(100000, 999999))
 
+    # SEPA EPC QR řetězec včetně BIC kódu
     sepa_string = (
-        f"BCD\n002\n1\nSCT\n\n"
+        f"BCD\n002\n1\nSCT\n"
+        f"{REVOLUT_BIC}\n"
         f"Mystická Svatyně\n"
         f"{REVOLUT_IBAN}\n"
         f"EUR{amount:.2f}\n\n\n"
@@ -111,6 +114,7 @@ def generate_qr():
         "title": service['title'],
         "price": f"{amount:.2f} EUR",
         "iban": REVOLUT_IBAN,
+        "bic": REVOLUT_BIC,
         "vs": vs
     })
 
@@ -138,7 +142,6 @@ def reserve():
     """
 
     try:
-        # Možnost A: Odesílá se pouze 1 e-mail na váš ADMIN_EMAIL s nastaveným reply_to
         resend.Emails.send({
             "from": "Mystická Svatyně <onboarding@resend.dev>",
             "to": ADMIN_EMAIL,
