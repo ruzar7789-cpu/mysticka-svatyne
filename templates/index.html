@@ -4,149 +4,354 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mystická Svatyně</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0a0512;
-            --card-bg: #170d2b;
-            --accent: #d4af37;
-            --text-color: #f3e8ff;
+            --bg-color: #07040d;
+            --card-bg: rgba(23, 13, 43, 0.6);
+            --accent-gold: #d4af37;
+            --accent-glow: rgba(212, 175, 55, 0.25);
+            --text-main: #f3e8ff;
+            --text-muted: #a799c4;
+            --border-gold: rgba(212, 175, 55, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(88, 28, 135, 0.25) 0%, transparent 70%),
+                radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
         }
 
         .container {
             width: 100%;
-            max-width: 750px;
+            max-width: 900px;
         }
 
-        h1, h2 {
-            color: var(--accent);
+        header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
         }
 
-        .box {
-            background-color: var(--card-bg);
-            border: 1px solid var(--accent);
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #fff 0%, #d4af37 50%, #aa8014 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-family: 'Cinzel', serif;
+            color: var(--accent-gold);
+            font-size: 1.6rem;
+            text-align: center;
+            margin: 40px 0 20px 0;
+            letter-spacing: 1px;
+        }
+
+        .card-box {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-gold);
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-box:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+
+        /* Tarot Section */
+        .tarot-wrapper {
+            text-align: center;
+        }
+
+        .tarot-card {
+            background: linear-gradient(145deg, #110826, #1c1038);
+            border: 1px solid var(--border-gold);
             border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1);
+            padding: 30px 20px;
+            margin: 20px auto;
+            max-width: 400px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
+        .tarot-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+        }
+
+        .tarot-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .service-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .service-title {
+            font-family: 'Cinzel', serif;
+            color: #fff;
+            font-size: 1.15rem;
+            margin-bottom: 10px;
+        }
+
+        .service-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 18px;
+            flex-grow: 1;
+        }
+
+        .service-price {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 16px;
+        }
+
+        /* Buttons & Inputs */
         button {
-            background-color: var(--accent);
-            color: var(--bg-color);
+            background: linear-gradient(135deg, #d4af37 0%, #a38118 100%);
+            color: #07040d;
             border: none;
-            padding: 14px 20px;
-            font-weight: bold;
-            font-size: 16px;
-            border-radius: 6px;
+            padding: 12px 20px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            transition: background 0.2s ease-in-out;
+            transition: opacity 0.2s ease, transform 0.1s ease;
         }
 
         button:hover {
-            background-color: #f3c846;
+            opacity: 0.9;
+        }
+
+        button:active {
+            transform: scale(0.99);
         }
 
         button:disabled {
-            background-color: #665220;
+            background: #4a3e20;
+            color: #888;
             cursor: not-allowed;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 12px;
-            margin-top: 6px;
+            padding: 12px 14px;
             margin-bottom: 18px;
-            border-radius: 6px;
-            border: 1px solid var(--accent);
-            background-color: var(--bg-color);
-            color: #fff;
-            box-sizing: border-box;
-            font-size: 15px;
-        }
-
-        .qr-display {
-            text-align: center;
-        }
-
-        .qr-display img {
-            max-width: 220px;
-            border: 2px solid var(--accent);
             border-radius: 8px;
+            border: 1px solid var(--border-gold);
+            background-color: rgba(7, 4, 13, 0.8);
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+
+        /* Modal Popup for QR */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #130a24;
+            border: 1px solid var(--accent-gold);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        .qr-img {
+            max-width: 200px;
+            border: 2px solid var(--border-gold);
+            border-radius: 12px;
             margin: 15px 0;
         }
 
-        .card-result {
-            font-size: 18px;
-            text-align: center;
-            padding: 15px;
-            min-height: 50px;
+        code {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: var(--accent-gold);
+            font-family: monospace;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>✨ Mystická Svatyně ✨</h1>
+        <header>
+            <h1>Mystická Svatyně</h1>
+            <p class="subtitle">Astro & Tarot Konsultace</p>
+        </header>
 
-        <div class="box">
-            <h2>Denní karta Tarotu</h2>
-            <div id="card-display" class="card-result">Prostřednictvím tlačítka níže si vytáhněte svou osobní kartu pro dnešní den...</div>
-            <button onclick="drawCard()">Táhnout kartu</button>
+        <!-- Tarot Section -->
+        <div class="card-box tarot-wrapper">
+            <h2 class="service-title" style="font-size: 1.4rem;">Osobní karta pro dnešní den</h2>
+            <div class="tarot-card">
+                <div id="card-title" class="tarot-name">✨</div>
+                <div id="card-desc" class="tarot-desc">Nahlédněte do tajemství přítomného okamžiku.</div>
+            </div>
+            <button onclick="drawCard()" style="max-width: 250px;">Táhnout kartu</button>
         </div>
 
-        <h2>Ceník & Služby</h2>
-        {% for key, service in services.items() %}
-        <div class="box">
-            <h3>{{ service.title }}</h3>
-            <p>{{ service.description }}</p>
-            <p><strong>Cena: {{ service.price }} {{ service.currency }}</strong></p>
-            <button onclick="generateQR('{{ key }}')">Zobrazit QR kód pro platbu</button>
+        <!-- Services Section -->
+        <h2 class="section-title">Nabídka Služeb</h2>
+        <div class="services-grid">
+            {% for key, service in services.items() %}
+            <div class="card-box service-card">
+                <div>
+                    <h3 class="service-title">{{ service.title }}</h3>
+                    <p class="service-desc">{{ service.description }}</p>
+                </div>
+                <div>
+                    <div class="service-price">{{ "%.0f"|format(service.price) }} €</div>
+                    <button onclick="generateQR('{{ key }}')">Zaplatit přes QR kód</button>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
 
-        <div id="qr-box" class="box" style="display: none;">
-            <h2>Podklady k platbě SEPA</h2>
-            <div id="qr-content" class="qr-display"></div>
-        </div>
-
-        <div class="box">
-            <h2>Rezervace Služby</h2>
+        <!-- Reservation Section -->
+        <h2 class="section-title">Rezervace Termínu</h2>
+        <div class="card-box">
             <form id="reservation-form">
-                <label for="res-email">Váš E-mail:</label>
-                <input type="email" id="res-email" required placeholder="priklad@email.cz">
+                <label for="res-email">Váš E-mail</label>
+                <input type="email" id="res-email" required placeholder="vás@email.cz">
 
-                <label for="res-service">Vyberte požadovanou službu:</label>
+                <label for="res-service">Požadovaná služba</label>
                 <select id="res-service">
                     {% for key, service in services.items() %}
-                    <option value="{{ key }}">{{ service.title }} ({{ service.price }} EUR)</option>
+                    <option value="{{ key }}">{{ service.title }} ({{ "%.0f"|format(service.price) }} €)</option>
                     {% endfor %}
                 </select>
 
-                <label for="res-note">Poznámka / Váš dotaz:</label>
-                <textarea id="res-note" rows="4" placeholder="Zadejte podrobnosti k vaší situaci..."></textarea>
+                <label for="res-note">Poznámka / Záměr</label>
+                <textarea id="res-note" rows="4" placeholder="Napište krátce vašem záměru nebo konkrétní otázce..."></textarea>
 
                 <button type="submit" id="res-submit-btn">Odeslat rezervaci</button>
             </form>
         </div>
     </div>
 
+    <!-- Modal window for QR Code -->
+    <div id="qr-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title" class="service-title"></h2>
+            <p id="modal-price" class="service-price" style="margin-top: 5px;"></p>
+            <div id="modal-qr-container"></div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px;">
+                IBAN: <code id="modal-iban"></code><br>
+                Variabilní symbol: <code id="modal-vs"></code>
+            </p>
+        </div>
+    </div>
+
     <script>
         async function drawCard() {
+            const titleEl = document.getElementById('card-title');
+            const descEl = document.getElementById('card-desc');
+            titleEl.innerText = "Míchám karty...";
+            descEl.innerText = "";
+
             const res = await fetch('/api/draw-card');
             const data = await res.json();
-            document.getElementById('card-display').innerHTML = `<strong>${data.name}</strong><br><br>${data.meaning}`;
+            
+            titleEl.innerText = data.name;
+            descEl.innerText = data.meaning;
         }
 
         async function generateQR(serviceId) {
@@ -156,17 +361,25 @@
                 body: JSON.stringify({ service_id: serviceId })
             });
             const data = await res.json();
-            const qrBox = document.getElementById('qr-box');
-            const qrContent = document.getElementById('qr-content');
 
-            qrContent.innerHTML = `
-                <p><strong>${data.title}</strong></p>
-                <p>Částka: <strong>${data.price}</strong></p>
-                <img src="${data.qr_image}" alt="SEPA QR kód">
-                <p>IBAN: <code>${data.iban}</code><br>Variabilní symbol: <code>${data.vs}</code></p>
-            `;
-            qrBox.style.display = 'block';
-            qrBox.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-price').innerText = data.price;
+            document.getElementById('modal-qr-container').innerHTML = `<img src="${data.qr_image}" class="qr-img" alt="QR kód">`;
+            document.getElementById('modal-iban').innerText = data.iban;
+            document.getElementById('modal-vs').innerText = data.vs;
+
+            document.getElementById('qr-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('qr-modal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('qr-modal');
+            if (event.target == modal) {
+                closeModal();
+            }
         }
 
         document.getElementById('reservation-form').addEventListener('submit', async function(e) {
@@ -197,7 +410,6 @@
                 }
             } catch (err) {
                 alert("Chyba při spojení se serverem.");
-                console.error(err);
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Odeslat rezervaci";
