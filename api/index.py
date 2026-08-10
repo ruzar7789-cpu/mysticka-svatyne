@@ -132,36 +132,20 @@ def reserve():
         <p><strong>Vybraná služba:</strong> {service_title} ({price})</p>
         <p><strong>E-mail klienta:</strong> {email}</p>
         <p><strong>Poznámka / Dotaz:</strong> {note if note else 'Bez poznámky'}</p>
-    </div>
-    """
-
-    client_html = f"""
-    <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #0a0512; color: #f3e8ff;">
-        <h2 style="color: #d4af37;">Potvrzení rezervace č. {reference_number}</h2>
-        <p>Děkujeme za vaši rezervaci v Mystické Svatyni.</p>
-        <p><strong>Služba:</strong> {service_title}</p>
-        <p><strong>Cena:</strong> {price}</p>
-        <p>Do 24 hodin vás budeme kontaktovat s podrobnostmi a termínem.</p>
         <hr style="border: 1px solid #d4af37;">
-        <p><em>Mystická Svatyně</em></p>
+        <p><em>Pro odpověď zákazníkovi stačí kliknout na "Odpovědět" ve vaší e-mailové aplikaci.</em></p>
     </div>
     """
 
     try:
+        # Možnost A: Odesílá se pouze 1 e-mail na váš ADMIN_EMAIL s nastaveným reply_to
         resend.Emails.send({
             "from": "Mystická Svatyně <onboarding@resend.dev>",
             "to": ADMIN_EMAIL,
+            "reply_to": email if email else ADMIN_EMAIL,
             "subject": f"Nová objednávka {reference_number} - {service_title}",
             "html": admin_html
         })
-
-        if email and "@" in email:
-            resend.Emails.send({
-                "from": "Mystická Svatyně <onboarding@resend.dev>",
-                "to": email,
-                "subject": f"Potvrzení rezervace č. {reference_number} - Mystická Svatyně",
-                "html": client_html
-            })
 
         return jsonify({
             "status": "success",
@@ -177,5 +161,3 @@ def reserve():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
