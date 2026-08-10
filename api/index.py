@@ -142,6 +142,7 @@ def reserve():
     """
 
     try:
+        # Odesílá se pouze 1 e-mail na váš ADMIN_EMAIL s nastaveným reply_to
         resend.Emails.send({
             "from": "Mystická Svatyně <onboarding@resend.dev>",
             "to": ADMIN_EMAIL,
@@ -152,7 +153,7 @@ def reserve():
 
         return jsonify({
             "status": "success",
-            "message": f"Rezervace č. {reference_number} byla úspěšně odeslána! Potvrzení bylo doručeno na e-mail."
+            "message": f"Rezervace č. {reference_number} byla úspěšně odeslána! Potvrzení bylo doručeno na váš e-mail."
         })
 
     except Exception as e:
@@ -164,3 +165,4 @@ def reserve():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
