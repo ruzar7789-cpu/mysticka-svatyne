@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystická Svatyně</title>
+    <style>
+        :root {
+            --bg-color: #0a0512;
+            --card-bg: #170d2b;
+            --accent: #d4af37;
+            --text-color: #f3e8ff;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+        }
+
+        h1, h2 {
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.1);
+        }
+
+        button {
+            background-color: var(--accent);
+            color: var(--bg-color);
+            border: none;
+            padding: 14px 20px;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #f3c846;
+        }
+
+        button:disabled {
+            background-color: #665220;
+            cursor: not-allowed;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            margin-bottom: 18px;
+            border-radius: 6px;
+            border: 1px solid var(--accent);
+            background-color: var(--bg-color);
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        .qr-display {
+            text-align: center;
+        }
+
+        .qr-display img {
+            max-width: 220px;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .card-result {
+            font-size: 18px;
+            text-align: center;
+            padding: 15px;
+            min-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Mystická Svatyně ✨</h1>
+
+        <div class="box">
+            <h2>Denní karta Tarotu</h2>
+            <div id="card-display" class="card-result">Prostřednictvím tlačítka níže si vytáhněte svou osobní kartu pro dnešní den...</div>
+            <button onclick="drawCard()">Táhnout kartu</button>
+        </div>
+
+        <h2>Ceník & Služby</h2>
+        {% for key, service in services.items() %}
+        <div class="box">
+            <h3>{{ service.title }}</h3>
+            <p>{{ service.description }}</p>
+            <p><strong>Cena: {{ service.price }} {{ service.currency }}</strong></p>
+            <button onclick="generateQR('{{ key }}')">Zobrazit QR kód pro platbu</button>
+        </div>
+        {% endfor %}
+
+        <div id="qr-box" class="box" style="display: none;">
+            <h2>Podklady k platbě SEPA</h2>
+            <div id="qr-content" class="qr-display"></div>
+        </div>
+
+        <div class="box">
+            <h2>Rezervace Služby</h2>
+            <form id="reservation-form">
+                <label for="res-email">Váš E-mail:</label>
+                <input type="email" id="res-email" required placeholder="priklad@email.cz">
+
+                <label for="res-service">Vyberte požadovanou službu:</label>
+                <select id="res-service">
+                    {% for key, service in services.items() %}
+                    <option value="{{ key }}">{{ service.title }} ({{ service.price }} EUR)</option>
+                    {% endfor %}
+                </select>
+
+                <label for="res-note">Poznámka / Váš dotaz:</label>
+                <textarea id="res-note" rows="4" placeholder="Zadejte podrobnosti k vaší situaci..."></textarea>
+
+                <button type="submit" id="res-submit-btn">Odeslat rezervaci</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function drawCard() {
+            const res = await fetch('/api/draw-card');
+            const data = await res.json();
+            document.getElementById('card-display').innerHTML = `<strong>${data.name}</strong><br><br>${data.meaning}`;
+        }
+
+        async function generateQR(serviceId) {
+            const res = await fetch('/api/generate-qr', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ service_id: serviceId })
+            });
+            const data = await res.json();
+            const qrBox = document.getElementById('qr-box');
+            const qrContent = document.getElementById('qr-content');
+
+            qrContent.innerHTML = `
+                <p><strong>${data.title}</strong></p>
+                <p>Částka: <strong>${data.price}</strong></p>
+                <img src="${data.qr_image}" alt="SEPA QR kód">
+                <p>IBAN: <code>${data.iban}</code><br>Variabilní symbol: <code>${data.vs}</code></p>
+            `;
+            qrBox.style.display = 'block';
+            qrBox.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        document.getElementById('reservation-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('res-email').value;
+            const service = document.getElementById('res-service').value;
+            const note = document.getElementById('res-note').value;
+            const btn = document.getElementById('res-submit-btn');
+
+            btn.disabled = true;
+            btn.innerText = "Odesílám rezervaci...";
+
+            try {
+                const response = await fetch('/api/reserve', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email: email, service: service, note: note })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    alert(data.message);
+                    document.getElementById('reservation-form').reset();
+                } else {
+                    alert("Chyba: " + (data.message || "Nepodařilo se odeslat."));
+                }
+            } catch (err) {
+                alert("Chyba při spojení se serverem.");
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Odeslat rezervaci";
+            }
+        });
+    </script>
+</body>
+</html>
