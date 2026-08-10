@@ -12,6 +12,7 @@
             --bg-color: #07040d;
             --card-bg: rgba(23, 13, 43, 0.6);
             --accent-gold: #d4af37;
+            --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7);
             --accent-glow: rgba(212, 175, 55, 0.25);
             --text-main: #f3e8ff;
             --text-muted: #a799c4;
@@ -89,9 +90,10 @@
             box-shadow: 0 8px 30px var(--accent-glow);
         }
 
-        /* Tarot Section */
+        /* Tarot Section Enhanced */
         .tarot-wrapper {
             text-align: center;
+            perspective: 1000px;
         }
 
         .tarot-card {
@@ -101,18 +103,38 @@
             padding: 30px 20px;
             margin: 20px auto;
             max-width: 400px;
-            min-height: 120px;
+            min-height: 160px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.15);
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .tarot-card.flip {
+            animation: cardFlip 0.6s ease-in-out;
+        }
+
+        @keyframes cardFlip {
+            0% { transform: rotateY(0deg) scale(1); }
+            50% { transform: rotateY(90deg) scale(0.95); }
+            100% { transform: rotateY(0deg) scale(1); }
         }
 
         .tarot-name {
             font-family: 'Cinzel', serif;
-            font-size: 1.3rem;
+            font-size: 1.35rem;
             color: var(--accent-gold);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+        }
+
+        .gold-divider {
+            height: 1px;
+            background: var(--gold-gradient);
+            width: 80px;
+            margin: 10px auto;
         }
 
         .tarot-desc {
@@ -168,11 +190,13 @@
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
-            transition: opacity 0.2s ease, transform 0.1s ease;
+            transition: opacity 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
         }
 
         button:hover {
-            opacity: 0.9;
+            opacity: 0.95;
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
         }
 
         button:active {
@@ -183,6 +207,7 @@
             background: #4a3e20;
             color: #888;
             cursor: not-allowed;
+            box-shadow: none;
         }
 
         label {
@@ -205,12 +230,13 @@
             font-family: inherit;
             font-size: 0.95rem;
             box-sizing: border-box;
-            transition: border-color 0.2s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--accent-gold);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
 
         /* Modal Popup for QR */
@@ -221,7 +247,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(8px);
             z-index: 1000;
             justify-content: center;
@@ -274,14 +300,15 @@
     <div class="container">
         <header>
             <h1>Mystická Svatyně</h1>
-            <p class="subtitle">Astro & Tarot Konsultace</p>
+            <p class="subtitle">Astro & Tarot Konzultace</p>
         </header>
 
         <!-- Tarot Section -->
         <div class="card-box tarot-wrapper">
             <h2 class="service-title" style="font-size: 1.4rem;">Osobní karta pro dnešní den</h2>
-            <div class="tarot-card">
+            <div class="tarot-card" id="tarot-card-box">
                 <div id="card-title" class="tarot-name">✨</div>
+                <div class="gold-divider"></div>
                 <div id="card-desc" class="tarot-desc">Nahlédněte do tajemství přítomného okamžiku.</div>
             </div>
             <button onclick="drawCard()" style="max-width: 250px;">Táhnout kartu</button>
@@ -298,14 +325,14 @@
                 </div>
                 <div>
                     <div class="service-price">{{ "%.0f"|format(service.price) }} €</div>
-                    <button onclick="generateQR('{{ key }}')">Zaplatit přes QR kód</button>
+                    <button onclick="selectAndPay('{{ key }}')">Zaplatit přes QR kód</button>
                 </div>
             </div>
             {% endfor %}
         </div>
 
         <!-- Reservation Section -->
-        <h2 class="section-title">Rezervace Termínu</h2>
+        <h2 class="section-title" id="reservation-title">Rezervace Termínu</h2>
         <div class="card-box">
             <form id="reservation-form">
                 <label for="res-email">Váš E-mail</label>
@@ -319,7 +346,7 @@
                 </select>
 
                 <label for="res-note">Poznámka / Záměr</label>
-                <textarea id="res-note" rows="4" placeholder="Napište krátce vašem záměru nebo konkrétní otázce..."></textarea>
+                <textarea id="res-note" rows="4" placeholder="Napište krátce o vašem záměru nebo konkrétní otázce..."></textarea>
 
                 <button type="submit" id="res-submit-btn">Odeslat rezervaci</button>
             </form>
@@ -342,33 +369,64 @@
 
     <script>
         async function drawCard() {
+            const cardBox = document.getElementById('tarot-card-box');
             const titleEl = document.getElementById('card-title');
             const descEl = document.getElementById('card-desc');
+
+            cardBox.classList.remove('flip');
+            void cardBox.offsetWidth; // Reset animace
+            cardBox.classList.add('flip');
+
             titleEl.innerText = "Míchám karty...";
             descEl.innerText = "";
 
-            const res = await fetch('/api/draw-card');
-            const data = await res.json();
-            
-            titleEl.innerText = data.name;
-            descEl.innerText = data.meaning;
+            try {
+                const res = await fetch('/api/draw-card');
+                const data = await res.json();
+                
+                setTimeout(() => {
+                    titleEl.innerText = data.name;
+                    descEl.innerText = data.meaning;
+                }, 250);
+            } catch (err) {
+                titleEl.innerText = "Chyba";
+                descEl.innerText = "Nepodařilo se načíst kartu.";
+            }
         }
 
         async function generateQR(serviceId) {
-            const res = await fetch('/api/generate-qr', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ service_id: serviceId })
-            });
-            const data = await res.json();
+            try {
+                const res = await fetch('/api/generate-qr', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ service_id: serviceId })
+                });
+                const data = await res.json();
 
-            document.getElementById('modal-title').innerText = data.title;
-            document.getElementById('modal-price').innerText = data.price;
-            document.getElementById('modal-qr-container').innerHTML = `<img src="${data.qr_image}" class="qr-img" alt="QR kód">`;
-            document.getElementById('modal-iban').innerText = data.iban;
-            document.getElementById('modal-vs').innerText = data.vs;
+                document.getElementById('modal-title').innerText = data.title;
+                document.getElementById('modal-price').innerText = data.price;
+                document.getElementById('modal-qr-container').innerHTML = `<img src="${data.qr_image}" class="qr-img" alt="QR kód">`;
+                document.getElementById('modal-iban').innerText = data.iban;
+                document.getElementById('modal-vs').innerText = data.vs;
 
-            document.getElementById('qr-modal').style.display = 'flex';
+                document.getElementById('qr-modal').style.display = 'flex';
+            } catch (err) {
+                alert("Chyba při generování QR kódu.");
+            }
+        }
+
+        function selectAndPay(serviceId) {
+            // Predvybrani sluzby ve formulari
+            const serviceSelect = document.getElementById('res-service');
+            if (serviceSelect) {
+                serviceSelect.value = serviceId;
+            }
+
+            // Plynuly posun k rezervacnimu kalendari / formulari
+            document.getElementById('reservation-title').scrollIntoView({ behavior: 'smooth' });
+
+            // Zobrazeni QR modal okna
+            generateQR(serviceId);
         }
 
         function closeModal() {
