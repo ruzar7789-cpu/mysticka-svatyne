@@ -13,7 +13,7 @@
     <!-- Google Search Console Ověření -->
     <meta name="google-site-verification" content="2ZAu0AzVD4zouytP19c8g_1SBi3K1SaWj769fs_Xsr4" />
 
-    <!-- Open Graph (Náhled při sdílení na Facebooku, WhatsAppu, Instagramu) -->
+    <!-- Open Graph -->
     <meta property="og:title" content="Mystická Svatyně | Výklad Tarotu a Rituály">
     <meta property="og:description" content="Nahlédněte do tajemství přítomného okamžiku. Výklady tarotu a energetické rituály na míru.">
     <meta property="og:type" content="website">
@@ -397,7 +397,7 @@
         </div>
 
         <!-- Reservation Section -->
-        <h2 class="section-title" id="reservation-title">Rezervace Termínu</h2>
+        <h2 class="section-title" id="reservation-section-title">Rezervace Termínu</h2>
         <div class="card-box">
             <form id="reservation-form">
                 <label for="res-email">Váš E-mail</label>
@@ -475,6 +475,8 @@
             const titleEl = document.getElementById('card-title');
             const descEl = document.getElementById('card-desc');
 
+            if (!cardBox || !titleEl || !descEl) return;
+
             cardBox.classList.remove('flip');
             void cardBox.offsetWidth; // Reset animace
             cardBox.classList.add('flip');
@@ -487,8 +489,8 @@
                 const data = await res.json();
                 
                 setTimeout(() => {
-                    titleEl.innerText = data.name;
-                    descEl.innerText = data.meaning;
+                    titleEl.innerText = data.name || "Karta stažena";
+                    descEl.innerText = data.meaning || "";
                 }, 250);
             } catch (err) {
                 titleEl.innerText = "Chyba";
@@ -505,12 +507,12 @@
                 });
                 const data = await res.json();
 
-                document.getElementById('modal-title').innerText = data.title;
-                document.getElementById('modal-price').innerText = data.price;
+                document.getElementById('modal-title').innerText = data.title || "";
+                document.getElementById('modal-price').innerText = data.price || "";
                 document.getElementById('modal-qr-container').innerHTML = `<img src="${data.qr_image}" class="qr-img" alt="QR kód">`;
-                document.getElementById('modal-iban').innerText = data.iban;
-                document.getElementById('modal-bic').innerText = data.bic;
-                document.getElementById('modal-vs').innerText = data.vs;
+                document.getElementById('modal-iban').innerText = data.iban || "";
+                document.getElementById('modal-bic').innerText = data.bic || "";
+                document.getElementById('modal-vs').innerText = data.vs || "";
 
                 openModal('qr-modal');
             } catch (err) {
@@ -524,36 +526,74 @@
                 serviceSelect.value = serviceId;
             }
 
-            document.getElementById('reservation-title').scrollIntoView({ behavior: 'smooth' });
+            const targetSection = document.getElementById('reservation-section-title');
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
             generateQR(serviceId);
         }
 
         function openModal(id) {
-            document.getElementById(id).style.display = 'flex';
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.display = 'flex';
+            }
         }
 
         function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.display = 'none';
+            }
         }
 
         window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
+            if (event.target.classList && event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
         }
 
-        document.getElementById('reservation-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        const resForm = document.getElementById('reservation-form');
+        if (resForm) {
+            resForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
 
-            const email = document.getElementById('res-email').value;
-            const service = document.getElementById('res-service').value;
-            const note = document.getElementById('res-note').value;
-            const btn = document.getElementById('res-submit-btn');
+                const email = document.getElementById('res-email').value;
+                const service = document.getElementById('res-service').value;
+                const note = document.getElementById('res-note').value;
+                const btn = document.getElementById('res-submit-btn');
 
-            btn.disabled = true;
-            btn.innerText = "Odesílám rezervaci...";
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerText = "Odesílám rezervaci...";
+                }
 
-            try {
-                const response = await fetch('/api/reserve', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/j
+                try {
+                    const response = await fetch('/api/reserve', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ email: email, service: service, note: note })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.status === 'success') {
+                        alert(data.message);
+                        resForm.reset();
+                    } else {
+                        alert("Chyba: " + (data.message || "Nepodařilo se odeslat."));
+                    }
+                } catch (err) {
+                    alert("Chyba při spojení se serverem.");
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = "Odeslat rezervaci";
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
