@@ -47,28 +47,205 @@ SERVICES = {
     }
 }
 
-TAROT_CARDS = [
-    {"name": "I. Mág", "meaning": "Absolutní potenciál, manifestace záměrů, vůle a tvořivá síla."},
-    {"name": "II. Velekněžka", "meaning": "Intuice, tajemství, vnitřní hlas a hluboké podvědomé vědění."},
-    {"name": "III. Císařovna", "meaning": "Hojnost, plodnost, přírodní růst a emocionální naplnění."},
-    {"name": "IV. Císař", "meaning": "Pevná struktura, autorita, stabilita a kontrola nad situací."},
-    {"name": "V. Velekněz", "meaning": "Tradiční moudrost, duchovní vedení, učení a morální hodnoty."},
-    {"name": "VI. Milenci", "meaning": "Láska, osudové rozhodnutí, harmonie vztahů a soulad."},
-    {"name": "VII. Vůz", "meaning": "Triumf, odhodlání, překonání překážek a pohyb vpřed."},
-    {"name": "VIII. Síla", "meaning": "Vnitřní síla, trpělivost, soucit a kontrola emocí."},
-    {"name": "IX. Poustevník", "meaning": "Vnitřní moudrost, nalezení vlastní cesty skrze sebereflexi."},
-    {"name": "X. Kolo Štěstěny", "meaning": "Osudový zvrat, cyklická změna, nová životní příležitost."},
-    {"name": "XI. Spravedlnost", "meaning": "Pravda, rovnováha, příčina a následek, fér jednání."},
-    {"name": "XII. Viselec", "meaning": "Nový úhel pohledu, oběť pro vyšší cíl, pauza v jednání."},
-    {"name": "XIII. Smrt", "meaning": "Konec starého cyklu, transformace, hluboká obroda."},
-    {"name": "XIV. Mírnost", "meaning": "Vyváženost, trpělivost, uzdravení a harmonické spojení."},
-    {"name": "XV. Ďábel", "meaning": "Pouta, pokušení, závislost nebo nevědomá omezení."},
-    {"name": "XVI. Věž", "meaning": "Náhlý zvrat, odhalení iluzí, osvobození od starých struktur."},
-    {"name": "XVII. Hvězda", "meaning": "Naděje, inspirace, duchovní vedení a vnitřní klid."},
-    {"name": "XVIII. Měsíc", "meaning": "Iluze, snění, hluboké podvědomé strachy a tajemství."},
-    {"name": "XIX. Slunce", "meaning": "Jasnost, životní energie, triumf, radost a uzdravení."},
-    {"name": "XX. Poslední soud", "meaning": "Procitnutí, znovuzrození, vyjasnění a vyšší volání."},
-    {"name": "XXI. Svět", "meaning": "Dokončení cyklu, integrace, dosažení cíle a harmonie."}
+TAROT_DECK = [
+    {
+        "id": "0_fool",
+        "name": "0. Blázen",
+        "element": "Vzduch",
+        "keywords": "Nové začátky, Důvěra, Spontánnost, Nevinnost",
+        "meaning": "Dnes je den pro nový začátek. Nebojte se udělat krok do neznáma a věřte, že vás vesmír podrží.",
+        "meaning_reversed": "Pozor na unáhlená rozhodnutí a naivitu. Než skočíte, raději se dvakrát rozhlédněte.",
+        "question": "Co vám brání udělat prvotní krok ke svému snu?"
+    },
+    {
+        "id": "1_magician",
+        "name": "I. Magik",
+        "element": "Vzduch",
+        "keywords": "Manifestace, Síla vůle, Schopnosti, Akce",
+        "meaning": "Máte k dispozici všechny nástroje a zdroje, které potřebujete k úspěchu. Čas proměnit záměr v realitu.",
+        "meaning_reversed": "Možná pochybujete o svých schopnostech nebo tříštíte pozornost. Zaměřte se na to podstatné.",
+        "question": "Jaký svůj skrytý talent můžete dnes plně využít?"
+    },
+    {
+        "id": "2_high_priestess",
+        "name": "II. Velekněžka",
+        "element": "Voda",
+        "keywords": "Intuice, Vnitřní hlas, Tajemství, Podvědomí",
+        "meaning": "Naslouchejte svému vnitřnímu hlasu a snové symbolice. Odpovědi se skrývají v tichu vašeho nitra.",
+        "meaning_reversed": "Přehlížíte varovné signály své intuice. Zastavte se a nenechte se přehlušit okolním hlukem.",
+        "question": "Co vám tichý vnitřní hlas říká, ale vy ho stále přehlížíte?"
+    },
+    {
+        "id": "3_empress",
+        "name": "III. Císařovna",
+        "element": "Země",
+        "keywords": "Hojnost, Tvořivost, Péče, Příroda",
+        "meaning": "Přichází období růstu, kreativity a plodnosti. Dopřejte si péči a vnímejte krásu kolem sebe.",
+        "meaning_reversed": "Pociťujete kreativní blok nebo zanedbáváte své potřeby na úkor druhých. Doplňte své zdroje.",
+        "question": "Jakým způsobem dnes můžete projevit lásku a péči sami k sobě?"
+    },
+    {
+        "id": "4_emperor",
+        "name": "IV. Císař",
+        "element": "Oheň",
+        "keywords": "Struktura, Autorita, Stabilita, Hranice",
+        "meaning": "Je čas vnést do života řád, nastavit jasné hranice a převzít plnou zodpovědnost za své směřování.",
+        "meaning_reversed": "Pozor na přehnanou tvrdost, kontrolu nebo naopak chaos a nedostatek sebekázně.",
+        "question": "Kde ve svém životě potřebujete nastavit pevnější hranice?"
+    },
+    {
+        "id": "5_hierophant",
+        "name": "V. Velekněz",
+        "element": "Země",
+        "keywords": "Tradice, Moudrost, Učení, Duchovní vedení",
+        "meaning": "Hledejte moudrost v ověřených hodnotách nebo požádejte o radu zkušeného mentora.",
+        "meaning_reversed": "Možná je čas zpochybnit stará dogmata a najít si svou vlastní, osobitou cestu.",
+        "question": "Kterému přesvědčení věříte jen proto, že vám to říkali druzí?"
+    },
+    {
+        "id": "6_lovers",
+        "name": "VI. Milenci",
+        "element": "Vzduch",
+        "keywords": "Láska, Volba, Harmonie, Hodnoty",
+        "meaning": "Karta přináší harmonii do vztahů a signalizuje důležité rozhodnutí založené na hodnotách srdce.",
+        "meaning_reversed": "Vnitřní rozpor nebo neuspořádané vztahy. Je potřeba vyjasnit si, co doopravdy chcete.",
+        "question": "Jste v souladu se svými hlavními životními hodnotami?"
+    },
+    {
+        "id": "7_chariot",
+        "name": "VII. Vůz",
+        "element": "Voda",
+        "keywords": "Triumf, Odhodlání, Pohyb, Kontrola",
+        "meaning": "Soustřeďte se na cíl a držte opratě pevně v rukou. Vaše odhodlání vás dovede k vítězství.",
+        "meaning_reversed": "Ztráta kontroly nebo bezhlavý tlak na pilu. Zpomalte a přehodnoťte směr.",
+        "question": "Kam směřujete svou energii a je to správný směr?"
+    },
+    {
+        "id": "8_strength",
+        "name": "VIII. Síla",
+        "element": "Oheň",
+        "keywords": "Trpělivost, Vnitřní síla, Soucit, Odvaha",
+        "meaning": "Skutečná síla vychází z jemnosti, trpělivosti a ovládnutí vlastních stínů a emocí.",
+        "meaning_reversed": "Pochybnosti o sobě samém nebo vyčerpání. Nezapomínejte být k sobě laskaví.",
+        "question": "Jakou výzvu můžete dnes překonat s klidem a vlídností?"
+    },
+    {
+        "id": "9_hermit",
+        "name": "IX. Poustevník",
+        "element": "Země",
+        "keywords": "Sebereflexe, Samota, Vnitřní světlo, Hledání",
+        "meaning": "Dopřejte si čas o samotě. Ve ztišení objevíte světlo, které vám posvítí na další cestu.",
+        "meaning_reversed": "Přílišná izolace od světa nebo pocit osamění. Nebojte se požádat o pomoc.",
+        "question": "Co objevíte, když na chvíli vypnete veškerý okolní hluk?"
+    },
+    {
+        "id": "10_wheel",
+        "name": "X. Kolo Štěstěny",
+        "element": "Oheň",
+        "keywords": "Osud, Změna, Cykly, Příležitost",
+        "meaning": "Život je v neustálém pohybu. Přijměte změnu jako příležitost, osud se obrací ve váš prospěch.",
+        "meaning_reversed": "Odpor vůči změnám. Snaha udržet věci, které už dosloužily, situaci jen komplikuje.",
+        "question": "Jakému cyklu ve svém životě se stále bráníte?"
+    },
+    {
+        "id": "11_justice",
+        "name": "XI. Spravedlnost",
+        "element": "Vzduch",
+        "keywords": "Pravda, Rovnováha, Příčina a následek, Jasnost",
+        "meaning": "Čeká vás spravedlivé vyúštění situace. Jednejte v souladu s pravdou a převezměte odpovědnost.",
+        "meaning_reversed": "Nespravedlnost, neupřímnost nebo odmítání přiznat si vlastní chybu.",
+        "question": "Jste k sobě i k druhým v tuto chvíli zcela upřímní?"
+    },
+    {
+        "id": "12_hanged_man",
+        "name": "XII. Viselec",
+        "element": "Voda",
+        "keywords": "Nová perspektiva, Zastavení, Odevzdání, Oběť",
+        "meaning": "Někdy je nejlepším krokem zastavit se a podívat se na situaci z úplně nového úhlu pohledu.",
+        "meaning_reversed": "Zbytečné otálení, pocit oběti nebo neschopnost nechat věci volně plynout.",
+        "question": "Jaký nový úhel pohledu vám může pomoci vyřešit současnou situaci?"
+    },
+    {
+        "id": "13_death",
+        "name": "XIII. Smrt",
+        "element": "Voda",
+        "keywords": "Transformace, Konec, Nový začátek, Propuštění",
+        "meaning": "Něco starého končí, aby uvolnilo místo novému. Přijměte přirozený proces transformace.",
+        "meaning_reversed": "Strach z opuštění minulosti. Držení se starých vzorců brání příchodu nového.",
+        "question": "Čeho je potřeba se konečně vzdát, abyste se mohli posunout dál?"
+    },
+    {
+        "id": "14_temperance",
+        "name": "XIV. Mírnost",
+        "element": "Oheň",
+        "keywords": "Rovnováha, Trpělivost, Harmonie, Mír",
+        "meaning": "Hledejte střední cestu a rovnováhu. Trpělivost a jemné propojování protikladů přinese klid.",
+        "meaning_reversed": "Extrémy, nevyrovnanost nebo nedostatek trpělivosti. Zpomalte a vyrovnejte své síly.",
+        "question": "V jaké oblasti svého života zacházíte do zbytečného extrému?"
+    },
+    {
+        "id": "15_devil",
+        "name": "XV. Ďábel",
+        "element": "Země",
+        "keywords": "Pouta, Iluze, Pokušení, Stín",
+        "meaning": "Poznejte své nezdravé závislosti a omezující přesvědčení. Klíč ke svobodě držíte ve svých rukou.",
+        "meaning_reversed": "Osvobození se z toxického prostředí nebo zlom v překonání zlozvyku.",
+        "question": "Jaká iluze nebo nezdravý návyk vás vnitřně svazuje?"
+    },
+    {
+        "id": "16_tower",
+        "name": "XVI. Věž",
+        "element": "Oheň",
+        "keywords": "Náhlá změna, Blesk, Osvobození, Procitnutí",
+        "meaning": "Zhroucení falešných jistot otevírá cestu k pravdě. Změna může být náhlá, ale očistná.",
+        "meaning_reversed": "Odsouvání nevyhnutelné změny nebo strach z prolomení starých struktur.",
+        "question": "Jaká nefunkční jistota ve vašem životě potřebuje přestavbu?"
+    },
+    {
+        "id": "17_star",
+        "name": "XVII. Hvězda",
+        "element": "Vzduch",
+        "keywords": "Naděje, Inspirace, Léčení, Jasnost",
+        "meaning": "Po bouři přichází klid a naděje. Věřte v budoucnost, jste pod ochranou vyšších sil.",
+        "meaning_reversed": "Ztráta víry nebo malomyslnost. Nezapomínejte, že po nejtemnější noci vždy svítá.",
+        "question": "Co vám dodává největší pocit naděje a klidu?"
+    },
+    {
+        "id": "18_moon",
+        "name": "XVIII. Luna",
+        "element": "Voda",
+        "keywords": "Iluze, Sny, Nejistota, Intuice",
+        "meaning": "Věci nemusí být takové, jak se zdají. Procházejte mlhou s důvěrou ve svůj vnitřní kompas.",
+        "meaning_reversed": "Rozptýlení iluzí, překonání strachu a vyjasnění zamotané situace.",
+        "question": "Jaký skrytý strach vám brání vidět situaci jasně?"
+    },
+    {
+        "id": "19_sun",
+        "name": "XIX. Slunce",
+        "element": "Oheň",
+        "keywords": "Radost, Úspěch, Vitalita, Jasnost",
+        "meaning": "Ozařuje vás pozitivní energie. Čeká vás období radosti, úspěchu a životní vitality.",
+        "meaning_reversed": "Dočasné přehlížení pozitivních věcí. Slunce stále svítí, i když je za mraky.",
+        "question": "Za co můžete být v tomto okamžiku nejvíce vděční?"
+    },
+    {
+        "id": "20_judgement",
+        "name": "XX. Poslední soud",
+        "element": "Oheň",
+        "keywords": "Procitnutí, Volání, Znovuzrození, Jasnost",
+        "meaning": "Přichází moment jasného nahlédnutí a odpoutání se od minulosti. Vyslyšte své vyšší volání.",
+        "meaning_reversed": "Pochybnosti o sobě, sebekritika nebo odmítání uzavřít starou kapitolu.",
+        "question": "K jaké nové fázi života vás vaše nitro právě teď volá?"
+    },
+    {
+        "id": "21_world",
+        "name": "XXI. Svět",
+        "element": "Země",
+        "keywords": "Dokončení, Integrace, Naplnění, Celistvost",
+        "meaning": "Dosáhli jste cíle a uzavřeli důležitou kapitolu. Vychutnejte si pocit celistvosti.",
+        "meaning_reversed": "Nedokončené záležitosti. Udělejte poslední krok k uzavření starého cyklu.",
+        "question": "Jaký úspěch si zaslouží vaši dnešní oslavu?"
+    }
 ]
 
 @app.route('/')
@@ -77,8 +254,21 @@ def home():
 
 @app.route('/api/draw-card', methods=['GET'])
 def draw_card():
-    card = random.choice(TAROT_CARDS)
-    return jsonify(card)
+    card = random.choice(TAROT_DECK)
+    is_reversed = random.random() < 0.20  # 20% šance na obrácenou kartu
+
+    card_name = f"{card['name']} (Obrácená)" if is_reversed else card['name']
+    meaning = card['meaning_reversed'] if is_reversed else card['meaning']
+
+    return jsonify({
+        "id": card["id"],
+        "name": card_name,
+        "element": card["element"],
+        "keywords": card["keywords"],
+        "meaning": meaning,
+        "question": card["question"],
+        "is_reversed": is_reversed
+    })
 
 @app.route('/api/generate-qr', methods=['POST'])
 def generate_qr():
@@ -142,7 +332,6 @@ def reserve():
     """
 
     try:
-        # Odesílá se pouze 1 e-mail na váš ADMIN_EMAIL s nastaveným reply_to
         resend.Emails.send({
             "from": "Mystická Svatyně <onboarding@resend.dev>",
             "to": ADMIN_EMAIL,
