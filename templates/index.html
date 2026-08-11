@@ -48,14 +48,16 @@
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 40px 20px 0 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
         .container {
             width: 100%;
             max-width: 900px;
+            flex-grow: 1;
         }
 
         header {
@@ -254,7 +256,7 @@
             box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
 
-        /* Modal Popup for QR */
+        /* Modal Popup */
         .modal {
             display: none;
             position: fixed;
@@ -275,8 +277,10 @@
             border: 1px solid var(--accent-gold);
             border-radius: 16px;
             padding: 30px;
-            max-width: 420px;
+            max-width: 500px;
             width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
             text-align: center;
             position: relative;
             box-shadow: 0 10px 40px rgba(0,0,0,0.8);
@@ -308,6 +312,52 @@
             border-radius: 4px;
             color: var(--accent-gold);
             font-family: monospace;
+        }
+
+        /* Footer styling */
+        footer {
+            width: 100%;
+            margin-top: 60px;
+            padding: 30px 20px;
+            border-top: 1px solid var(--border-gold);
+            background: rgba(7, 4, 13, 0.95);
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .footer-links a {
+            color: var(--accent-gold);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-disclaimer {
+            font-size: 0.75rem;
+            line-height: 1.4;
+            max-width: 700px;
+            opacity: 0.7;
         }
     </style>
 </head>
@@ -371,7 +421,7 @@
     <!-- Modal window for QR Code -->
     <div id="qr-modal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <span class="close-btn" onclick="closeModal('qr-modal')">&times;</span>
             <h2 id="modal-title" class="service-title"></h2>
             <p id="modal-price" class="service-price" style="margin-top: 5px;"></p>
             <div id="modal-qr-container"></div>
@@ -382,6 +432,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal window for Terms & GDPR -->
+    <div id="terms-modal" class="modal">
+        <div class="modal-content" style="text-align: left;">
+            <span class="close-btn" onclick="closeModal('terms-modal')">&times;</span>
+            <h2 class="service-title" style="text-align: center; margin-bottom: 15px;">Obchodní podmínky & GDPR</h2>
+            <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                <h3 style="color: var(--accent-gold); margin: 10px 0 5px 0;">1. Poskytovatel služeb</h3>
+                <p>Služby Astro & Tarot konzultací poskytuje provozovatel projektu Mystická Svatyně. Kontakt: info@mysticka-svatyne.vercel.app</p>
+                
+                <h3 style="color: var(--accent-gold); margin: 15px 0 5px 0;">2. Povaha služeb</h3>
+                <p>Veškeré výklady tarotu, horoskopy a energetické konzultace slouží výhradně pro účely osobního rozvoje, sebereflexe a zábavy. Nenahrazují odbornou lékařskou, psychologickou, právní ani finanční péči.</p>
+                
+                <h3 style="color: var(--accent-gold); margin: 15px 0 5px 0;">3. Platby a rezervace</h3>
+                <p>Služby jsou poskytovány na základě předchozí úhrady bankovním převodem (pomocí QR kódu nebo přímého převodu). Termín plnění je sjednán individuálně po připsání platby.</p>
+                
+                <h3 style="color: var(--accent-gold); margin: 15px 0 5px 0;">4. Ochrana osobních údajů (GDPR)</h3>
+                <p>Osobní údaje (e-mail, poznámky k rezervaci) jsou zpracovávány výhradně za účelem vyřízení vaší objednávky a nejsou předávány třetím stranám.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a onclick="openModal('terms-modal')">Obchodní podmínky & GDPR</a>
+                <span>•</span>
+                <a href="mailto:info@mysticka-svatyne.vercel.app">Kontakt: info@mysticka-svatyne.vercel.app</a>
+            </div>
+            <p class="footer-disclaimer">
+                Upozornění: Astro a Tarot konzultace slouží pro osobní rozvoj a sebereflexi. Nenahrazují odborné lékařské, právní ani finanční poradenství.
+            </p>
+            <p>© 2026 Mystická Svatyně. Všechna práva vyhrazena.</p>
+        </div>
+    </footer>
 
     <script>
         async function drawCard() {
@@ -426,7 +512,7 @@
                 document.getElementById('modal-bic').innerText = data.bic;
                 document.getElementById('modal-vs').innerText = data.vs;
 
-                document.getElementById('qr-modal').style.display = 'flex';
+                openModal('qr-modal');
             } catch (err) {
                 alert("Chyba při generování QR kódu.");
             }
@@ -442,14 +528,17 @@
             generateQR(serviceId);
         }
 
-        function closeModal() {
-            document.getElementById('qr-modal').style.display = 'none';
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
         }
 
         window.onclick = function(event) {
-            const modal = document.getElementById('qr-modal');
-            if (event.target == modal) {
-                closeModal();
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
             }
         }
 
@@ -467,25 +556,4 @@
             try {
                 const response = await fetch('/api/reserve', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ email: email, service: service, note: note })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.status === 'success') {
-                    alert(data.message);
-                    document.getElementById('reservation-form').reset();
-                } else {
-                    alert("Chyba: " + (data.message || "Nepodařilo se odeslat."));
-                }
-            } catch (err) {
-                alert("Chyba při spojení se serverem.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Odeslat rezervaci";
-            }
-        });
-    </script>
-</body>
-</html>
+                    headers: {'Content-Type': 'application/j
