@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mystická Svatyně</title>
+    
+    <!-- Základní SEO pro vyhledávače -->
+    <title>Mystická Svatyně | Osobní výklad Tarotu a Rituály online</title>
+    <meta name="description" content="Online výklad tarotu, roční horoskopy a mistrovské rituály pro harmonizaci vztahů a osobní ochranu. Získejte jasnost a vedení pro váš život.">
+    <meta name="keywords" content="výklad tarotu, tarot online, kartářka, rituál lásky, energetická očista, horoskop, věštění, rituály">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph (Náhled při sdílení na Facebooku, WhatsAppu, Instagramu) -->
+    <meta property="og:title" content="Mystická Svatyně | Výklad Tarotu a Rituály">
+    <meta property="og:description" content="Nahlédněte do tajemství přítomného okamžiku. Výklady tarotu a energetické rituály na míru.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mysticka-svatyne.vercel.app">
+
+    <!-- Místo pro ověřovací kód Google (doplníme po získání z Search Console) -->
+    <!-- <meta name="google-site-verification" content="DOPLNI_SE_ZDE" /> -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
@@ -303,6 +318,7 @@
             <p class="subtitle">Astro & Tarot Konzultace</p>
         </header>
 
+        <!-- Tarot Section -->
         <div class="card-box tarot-wrapper">
             <h2 class="service-title" style="font-size: 1.4rem;">Osobní karta pro dnešní den</h2>
             <div class="tarot-card" id="tarot-card-box">
@@ -313,6 +329,7 @@
             <button onclick="drawCard()" style="max-width: 250px;">Táhnout kartu</button>
         </div>
 
+        <!-- Services Section -->
         <h2 class="section-title">Nabídka Služeb</h2>
         <div class="services-grid">
             {% for key, service in services.items() %}
@@ -329,6 +346,7 @@
             {% endfor %}
         </div>
 
+        <!-- Reservation Section -->
         <h2 class="section-title" id="reservation-title">Rezervace Termínu</h2>
         <div class="card-box">
             <form id="reservation-form">
@@ -350,6 +368,7 @@
         </div>
     </div>
 
+    <!-- Modal window for QR Code -->
     <div id="qr-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal()">&times;</span>
