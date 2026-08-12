@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Základní SEO pro vyhledávače -->
+    <!-- SEO -->
     <title>Mystická Svatyně | Osobní výklad Tarotu a Rituály online</title>
     <meta name="description" content="Online výklad tarotu, roční horoskopy a mistrovské rituály pro harmonizaci vztahů a osobní ochranu. Získejte jasnost a vedení pro váš život.">
     <meta name="keywords" content="výklad tarotu, tarot online, kartářka, rituál lásky, energetická očista, horoskop, věštění, rituály">
@@ -22,6 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --bg-color: #07040d;
@@ -29,6 +30,7 @@
             --accent-gold: #d4af37;
             --gold-gradient: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728, #fbf5b7);
             --accent-glow: rgba(212, 175, 55, 0.25);
+            --accent-purple: #7b2cbf;
             --text-main: #f3e8ff;
             --text-muted: #a799c4;
             --border-gold: rgba(212, 175, 55, 0.3);
@@ -119,14 +121,14 @@
             border-radius: 12px;
             padding: 30px 20px;
             margin: 20px auto;
-            max-width: 400px;
-            min-height: 160px;
+            max-width: 450px;
+            min-height: 200px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.15);
-            transition: transform 0.6s;
+            transition: transform 0.6s, border-color 0.3s;
             transform-style: preserve-3d;
         }
 
@@ -140,11 +142,30 @@
             100% { transform: rotateY(0deg) scale(1); }
         }
 
+        .card-tag {
+            display: inline-block;
+            background: var(--accent-purple);
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .tarot-name {
             font-family: 'Cinzel', serif;
             font-size: 1.35rem;
             color: var(--accent-gold);
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+        }
+
+        .card-keywords {
+            font-style: italic;
+            color: var(--accent-gold);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
         }
 
         .gold-divider {
@@ -158,6 +179,17 @@
             color: var(--text-muted);
             font-size: 0.95rem;
             line-height: 1.5;
+        }
+
+        .reflection-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(123, 44, 191, 0.15);
+            border-left: 3px solid var(--accent-gold);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            text-align: left;
+            width: 100%;
         }
 
         /* Services Grid */
@@ -371,12 +403,23 @@
         <!-- Tarot Section -->
         <div class="card-box tarot-wrapper">
             <h2 class="service-title" style="font-size: 1.4rem;">Osobní karta pro dnešní den</h2>
+            
             <div class="tarot-card" id="tarot-card-box">
+                <div id="card-tag-wrapper" style="display: none;">
+                    <span id="card-element" class="card-tag">Element</span>
+                </div>
                 <div id="card-title" class="tarot-name">✨</div>
+                <div id="card-keywords" class="card-keywords" style="display: none;"></div>
                 <div class="gold-divider"></div>
                 <div id="card-desc" class="tarot-desc">Nahlédněte do tajemství přítomného okamžiku.</div>
+                
+                <div id="card-reflection" class="reflection-box" style="display: none;">
+                    <strong>Otázka k sebereflexi:</strong>
+                    <p id="card-question" style="margin-top: 4px; font-style: italic;"></p>
+                </div>
             </div>
-            <button onclick="drawCard()" style="max-width: 250px;">Táhnout kartu</button>
+
+            <button id="draw-btn" onclick="drawCard()" style="max-width: 250px;">Táhnout kartu</button>
         </div>
 
         <!-- Services Section -->
@@ -470,6 +513,21 @@
     </footer>
 
     <script>
+        const TODAY_KEY = 'tarot_card_' + new Date().toISOString().slice(0, 10);
+
+        // Při načtení stránky zkontrolujeme, zda už dnes karta nebyla vytáhnutá
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedCard = localStorage.getItem(TODAY_KEY);
+            if (savedCard) {
+                try {
+                    displayCard(JSON.parse(savedCard));
+                    lockDrawButton();
+                } catch (e) {
+                    localStorage.removeItem(TODAY_KEY);
+                }
+            }
+        });
+
         async function drawCard() {
             const cardBox = document.getElementById('tarot-card-box');
             const titleEl = document.getElementById('card-title');
@@ -477,24 +535,67 @@
 
             if (!cardBox || !titleEl || !descEl) return;
 
+            // Spuštění flip animace
             cardBox.classList.remove('flip');
-            void cardBox.offsetWidth; // Reset animace
+            void cardBox.offsetWidth; // Trigger reflow pro reset animace
             cardBox.classList.add('flip');
 
             titleEl.innerText = "Míchám karty...";
             descEl.innerText = "";
+            document.getElementById('card-tag-wrapper').style.display = 'none';
+            document.getElementById('card-keywords').style.display = 'none';
+            document.getElementById('card-reflection').style.display = 'none';
 
             try {
                 const res = await fetch('/api/draw-card');
                 const data = await res.json();
                 
                 setTimeout(() => {
-                    titleEl.innerText = data.name || "Karta stažena";
-                    descEl.innerText = data.meaning || "";
+                    localStorage.setItem(TODAY_KEY, JSON.stringify(data));
+                    displayCard(data);
+                    lockDrawButton();
                 }, 250);
             } catch (err) {
                 titleEl.innerText = "Chyba";
                 descEl.innerText = "Nepodařilo se načíst kartu.";
+            }
+        }
+
+        function displayCard(data) {
+            const cardBox = document.getElementById('tarot-card-box');
+            const titleEl = document.getElementById('card-title');
+            const descEl = document.getElementById('card-desc');
+            
+            titleEl.innerText = data.name || "Karta stažena";
+            descEl.innerText = data.meaning || "";
+
+            if (data.element) {
+                document.getElementById('card-element').innerText = data.element;
+                document.getElementById('card-tag-wrapper').style.display = 'block';
+            }
+
+            if (data.keywords) {
+                document.getElementById('card-keywords').innerText = data.keywords;
+                document.getElementById('card-keywords').style.display = 'block';
+            }
+
+            if (data.question) {
+                document.getElementById('card-question').innerText = data.question;
+                document.getElementById('card-reflection').style.display = 'block';
+            }
+
+            if (data.is_reversed) {
+                cardBox.style.borderColor = '#e63946';
+            } else {
+                cardBox.style.borderColor = 'var(--border-gold)';
+            }
+        }
+
+        function lockDrawButton() {
+            const btn = document.getElementById('draw-btn');
+            if (btn) {
+                btn.innerText = "Karta pro dnešní den načtena";
+                btn.disabled = true;
             }
         }
 
