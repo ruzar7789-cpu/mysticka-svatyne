@@ -13,94 +13,104 @@ import qrcode
 import resend
 
 
-# ============================================================
-# MYSTICKÁ SVATYNĚ – TAROT & ASTRO
-# Backend: Flask / Python
-# Bez databáze a bez zákaznických hesel
-# ============================================================
-
-app = Flask(__name__, template_folder='../templates')
+app = Flask(__name__, template_folder="../templates")
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
 
-# Původní platební údaje – zachované
-REVOLUT_IBAN = "LT803250069633761109"
-REVOLUT_BIC = "REVOLT21"
-BENEFICIARY_NAME = "Mystická Svatyně"
+# ---------------------------------------------------------
+# KONFIGURACE PLATEB A E-MAILU
+# ---------------------------------------------------------
 
-# Původní administrátorský e-mail – zachovaný
-ADMIN_EMAIL = "ruzar7789@gmail.com"
+REVOLUT_IBAN = os.getenv(
+    "REVOLUT_IBAN",
+    "LT803250069633761109"
+).replace(" ", "").upper()
 
-# Odesílatel e-mailů
-RESEND_FROM = "Mystická Svatyně <onboarding@resend.dev>"
+REVOLUT_BIC = os.getenv(
+    "REVOLUT_BIC",
+    "REVOLT21"
+).replace(" ", "").upper()
 
-# Tajný API klíč Resend ponecháváme ve Vercelu
+BENEFICIARY_NAME = os.getenv(
+    "PAYMENT_BENEFICIARY_NAME",
+    "Mystická Svatyně"
+)
+
+ADMIN_EMAIL = os.getenv(
+    "ADMIN_EMAIL",
+    "ruzar7789@gmail.com"
+).strip()
+
+RESEND_FROM = os.getenv(
+    "RESEND_FROM",
+    "Mystická Svatyně <onboarding@resend.dev>"
+).strip()
+
 resend.api_key = os.getenv("RESEND_API_KEY", "")
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("mysticka_svatyne")
 
 
-# ============================================================
+# ---------------------------------------------------------
 # JAZYKY
-# ============================================================
+# ---------------------------------------------------------
 
 SUPPORTED_LANGUAGES = ("de", "cs", "en")
-DEFAULT_LANGUAGE = "de"
+
+
+def get_language(value):
+    if not isinstance(value, str):
+        return "de"
+
+    value = value.lower().strip()
+
+    if value not in SUPPORTED_LANGUAGES:
+        return "de"
+
+    return value
+
 
 MESSAGES = {
     "de": {
         "invalid_json": "Die Anfrage enthält keine gültigen JSON-Daten.",
         "invalid_service": "Der ausgewählte Dienst ist ungültig.",
         "invalid_email": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
-        "invalid_reference": "Die Zahlungsreferenz hat ein ungültiges Format.",
-        "invalid_request": "Die Anfrage ist ungültig.",
-        "email_unavailable": "Die Reservierung kann derzeit nicht gesendet werden. Bitte versuchen Sie es später erneut.",
-        "email_failed": "Die Reservierung konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+        "reservation_error": "Die Anfrage konnte momentan nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+        "send_error": "Das Senden der Anfrage ist fehlgeschlagen. Bitte versuchen Sie es später erneut.",
         "payment_notice": "Die Zahlung wird erst nach manueller Prüfung des Zahlungseingangs bestätigt.",
-        "pending": "Die Zahlung wartet auf manuelle Bestätigung.",
-        "reservation_received": "Ihre Anfrage wurde angenommen. Die Zahlung ist noch nicht bestätigt. Wir prüfen den Zahlungseingang manuell. Der Termin wird individuell vereinbart."
+        "too_large": "Die Anfrage ist zu groß.",
+        "reservation_success": "Ihre Anfrage wurde angenommen. Die Zahlung ist noch nicht bestätigt. Wir prüfen den Zahlungseingang manuell. Der Termin wird individuell vereinbart.",
+        "reversed": " (Umgekehrt)"
     },
     "cs": {
         "invalid_json": "Požadavek musí obsahovat platná JSON data.",
         "invalid_service": "Vybraná služba není platná.",
         "invalid_email": "Zadejte platnou e-mailovou adresu.",
-        "invalid_reference": "Reference platby nemá platný formát.",
-        "invalid_request": "Požadavek není platný.",
-        "email_unavailable": "Rezervaci nyní nelze odeslat. Zkuste to prosím později.",
-        "email_failed": "Odeslání rezervace se nezdařilo. Zkuste to prosím později.",
+        "reservation_error": "Rezervaci nyní nelze odeslat. Zkuste to prosím později.",
+        "send_error": "Odeslání rezervace se nezdařilo. Zkuste to prosím později.",
         "payment_notice": "Platba bude potvrzena až po ruční kontrole připsání peněz.",
-        "pending": "Platba čeká na ruční potvrzení.",
-        "reservation_received": "Vaše poptávka byla přijata. Platba zatím není potvrzena. Připsání peněz ověříme ručně. Termín bude domluven individuálně."
+        "too_large": "Požadavek je příliš velký.",
+        "reservation_success": "Vaše poptávka byla přijata. Platba zatím není potvrzena. Připsání peněz ověříme ručně. Termín bude domluven individuálně.",
+        "reversed": " (Obrácená)"
     },
     "en": {
         "invalid_json": "The request must contain valid JSON data.",
         "invalid_service": "The selected service is invalid.",
         "invalid_email": "Please enter a valid email address.",
-        "invalid_reference": "The payment reference has an invalid format.",
-        "invalid_request": "The request is invalid.",
-        "email_unavailable": "The reservation cannot be sent right now. Please try again later.",
-        "email_failed": "The reservation could not be sent. Please try again later.",
-        "payment_notice": "Payment will only be confirmed after manual verification of the incoming transfer.",
-        "pending": "Payment is awaiting manual confirmation.",
-        "reservation_received": "Your request has been received. Payment is not yet confirmed. We will manually verify the incoming transfer. The appointment will be arranged individually."
+        "reservation_error": "Your request cannot be sent right now. Please try again later.",
+        "send_error": "The request could not be sent. Please try again later.",
+        "payment_notice": "Payment will only be confirmed after we manually verify that the money has arrived.",
+        "too_large": "The request is too large.",
+        "reservation_success": "Your request has been received. Payment has not yet been confirmed. We will manually verify the incoming payment. The appointment will be arranged individually.",
+        "reversed": " (Reversed)"
     }
 }
 
 
-def get_language(value=None):
-    if isinstance(value, str):
-        value = value.lower().strip()
-    return value if value in SUPPORTED_LANGUAGES else DEFAULT_LANGUAGE
-
-
-def message(key, language=None):
-    language = get_language(language)
-    return MESSAGES[language].get(key, MESSAGES[DEFAULT_LANGUAGE].get(key, key))
-
-
-# ============================================================
-# SLUŽBY – PŮVODNÍ ID A CENY ZACHOVÁNY
-# ============================================================
+# ---------------------------------------------------------
+# SLUŽBY A CENY
+# ID A CENY ZŮSTÁVAJÍ ZACHOVÁNY
+# ---------------------------------------------------------
 
 SERVICES = {
     "tarot_basic": {
@@ -136,9 +146,9 @@ SERVICES = {
 }
 
 
-# ============================================================
-# TAROT – VŠECH 22 KARET
-# ============================================================
+# ---------------------------------------------------------
+# TAROT – PŮVODNÍ ČESKÝ OBSAH VŠECH 22 KARET
+# ---------------------------------------------------------
 
 TAROT_DECK = [
     {
@@ -245,7 +255,7 @@ TAROT_DECK = [
         "name": "XI. Spravedlnost",
         "element": "Vzduch",
         "keywords": "Pravda, Rovnováha, Příčina a následek, Jasnost",
-        "meaning": "Čeká vás spravedlivé vyústění situace. Jednejte v souladu s pravdou a převezměte odpovědnost.",
+        "meaning": "Čeká vás spravedlivé vyúštění situace. Jednejte v souladu s pravdou a převezměte odpovědnost.",
         "meaning_reversed": "Nespravedlnost, neupřímnost nebo odmítání přiznat si vlastní chybu.",
         "question": "Jste k sobě i k druhým v tuto chvíli zcela upřímní?"
     },
@@ -342,9 +352,366 @@ TAROT_DECK = [
 ]
 
 
-# ============================================================
-# POMOCNÉ FUNKCE
-# ============================================================
+# ---------------------------------------------------------
+# NĚMECKÉ A ANGLICKÉ PŘEKLADY TAROTU
+# Struktura: název, živel, klíčová slova,
+# přímý význam, obrácený význam, otázka
+# ---------------------------------------------------------
+
+TAROT_TRANSLATIONS = {
+    "de": {
+        "0_fool": (
+            "0. Der Narr", "Luft",
+            "Neuanfang, Vertrauen, Spontaneität, Unschuld",
+            "Heute ist ein Tag für einen Neuanfang. Wagen Sie den Schritt ins Unbekannte und vertrauen Sie darauf, dass das Universum Sie unterstützt.",
+            "Hüten Sie sich vor übereilten Entscheidungen und Naivität. Schauen Sie sich lieber zweimal um, bevor Sie springen.",
+            "Was hält Sie davon ab, den ersten Schritt in Richtung Ihres Traums zu machen?"
+        ),
+        "1_magician": (
+            "I. Der Magier", "Luft",
+            "Manifestation, Willenskraft, Fähigkeiten, Handlung",
+            "Sie verfügen über alle Werkzeuge und Ressourcen, die Sie für Ihren Erfolg benötigen. Jetzt ist es an der Zeit, Ihre Absicht in die Realität umzusetzen.",
+            "Vielleicht zweifeln Sie an Ihren Fähigkeiten oder verlieren sich in zu vielen Dingen. Konzentrieren Sie sich auf das Wesentliche.",
+            "Welches verborgene Talent können Sie heute voll einsetzen?"
+        ),
+        "2_high_priestess": (
+            "II. Die Hohepriesterin", "Wasser",
+            "Intuition, Innere Stimme, Geheimnisse, Unterbewusstsein",
+            "Hören Sie auf Ihre innere Stimme und die Symbolik Ihrer Träume. Die Antworten liegen in der Stille Ihres Inneren.",
+            "Sie überhören möglicherweise die Warnsignale Ihrer Intuition. Halten Sie inne und lassen Sie sich nicht vom Lärm der Außenwelt übertönen.",
+            "Was sagt Ihnen Ihre innere Stimme, das Sie bisher überhören?"
+        ),
+        "3_empress": (
+            "III. Die Herrscherin", "Erde",
+            "Fülle, Kreativität, Fürsorge, Natur",
+            "Eine Zeit des Wachstums, der Kreativität und Fruchtbarkeit beginnt. Gönnen Sie sich Fürsorge und nehmen Sie die Schönheit um sich herum wahr.",
+            "Vielleicht erleben Sie eine kreative Blockade oder vernachlässigen Ihre eigenen Bedürfnisse zugunsten anderer. Stärken Sie Ihre Kraftquellen.",
+            "Wie können Sie sich heute selbst Liebe und Fürsorge schenken?"
+        ),
+        "4_emperor": (
+            "IV. Der Herrscher", "Feuer",
+            "Struktur, Autorität, Stabilität, Grenzen",
+            "Es ist Zeit, Ordnung in Ihr Leben zu bringen, klare Grenzen zu setzen und die volle Verantwortung für Ihren Weg zu übernehmen.",
+            "Achten Sie auf übermäßige Härte und Kontrolle oder auf Chaos und mangelnde Selbstdisziplin.",
+            "Wo in Ihrem Leben sollten Sie klarere Grenzen setzen?"
+        ),
+        "5_hierophant": (
+            "V. Der Hierophant", "Erde",
+            "Tradition, Weisheit, Lernen, Spirituelle Führung",
+            "Suchen Sie Weisheit in bewährten Werten oder bitten Sie einen erfahrenen Mentor um Rat.",
+            "Vielleicht ist es an der Zeit, alte Dogmen zu hinterfragen und Ihren eigenen Weg zu finden.",
+            "An welche Überzeugung glauben Sie nur, weil andere sie Ihnen vermittelt haben?"
+        ),
+        "6_lovers": (
+            "VI. Die Liebenden", "Luft",
+            "Liebe, Entscheidung, Harmonie, Werte",
+            "Diese Karte bringt Harmonie in Beziehungen und weist auf eine wichtige Entscheidung hin, die auf den Werten Ihres Herzens beruht.",
+            "Ein innerer Konflikt oder unausgeglichene Beziehungen können Sie beschäftigen. Werden Sie sich darüber klar, was Sie wirklich wollen.",
+            "Leben Sie im Einklang mit Ihren wichtigsten Lebenswerten?"
+        ),
+        "7_chariot": (
+            "VII. Der Wagen", "Wasser",
+            "Triumph, Entschlossenheit, Bewegung, Kontrolle",
+            "Konzentrieren Sie sich auf Ihr Ziel und behalten Sie die Zügel fest in der Hand. Ihre Entschlossenheit führt Sie zum Erfolg.",
+            "Vielleicht verlieren Sie die Kontrolle oder setzen sich selbst zu sehr unter Druck. Verlangsamen Sie das Tempo und überdenken Sie Ihre Richtung.",
+            "Wohin lenken Sie Ihre Energie, und ist es die richtige Richtung?"
+        ),
+        "8_strength": (
+            "VIII. Die Kraft", "Feuer",
+            "Geduld, Innere Stärke, Mitgefühl, Mut",
+            "Wahre Stärke entsteht aus Sanftheit, Geduld und dem bewussten Umgang mit den eigenen Schatten und Gefühlen.",
+            "Möglicherweise zweifeln Sie an sich selbst oder fühlen sich erschöpft. Seien Sie freundlich zu sich.",
+            "Welche Herausforderung können Sie heute mit Ruhe und Freundlichkeit meistern?"
+        ),
+        "9_hermit": (
+            "IX. Der Eremit", "Erde",
+            "Selbstreflexion, Einsamkeit, Inneres Licht, Suche",
+            "Nehmen Sie sich Zeit für sich selbst. In der Stille entdecken Sie das Licht, das Ihnen den weiteren Weg weist.",
+            "Vielleicht ziehen Sie sich zu sehr zurück oder fühlen sich einsam. Scheuen Sie sich nicht, um Hilfe zu bitten.",
+            "Was können Sie entdecken, wenn Sie den Lärm der Außenwelt für einen Moment ausschalten?"
+        ),
+        "10_wheel": (
+            "X. Das Rad des Schicksals", "Feuer",
+            "Schicksal, Veränderung, Zyklen, Gelegenheit",
+            "Das Leben ist ständig in Bewegung. Nehmen Sie Veränderungen als Chance an. Das Schicksal kann sich zu Ihren Gunsten wenden.",
+            "Widerstand gegen Veränderungen und das Festhalten an Dingen, deren Zeit vorbei ist, erschweren die Situation.",
+            "Gegen welchen Lebenszyklus wehren Sie sich immer noch?"
+        ),
+        "11_justice": (
+            "XI. Die Gerechtigkeit", "Luft",
+            "Wahrheit, Gleichgewicht, Ursache und Wirkung, Klarheit",
+            "Eine faire Lösung Ihrer Situation steht bevor. Handeln Sie wahrhaftig und übernehmen Sie Verantwortung.",
+            "Ungerechtigkeit, Unehrlichkeit oder die Weigerung, eigene Fehler einzugestehen, können eine Rolle spielen.",
+            "Sind Sie im Moment zu sich selbst und zu anderen vollkommen ehrlich?"
+        ),
+        "12_hanged_man": (
+            "XII. Der Gehängte", "Wasser",
+            "Neue Perspektive, Stillstand, Hingabe, Opfer",
+            "Manchmal ist es der beste Schritt, innezuhalten und eine Situation aus einem völlig neuen Blickwinkel zu betrachten.",
+            "Unnötiges Aufschieben, das Gefühl, ein Opfer zu sein, oder die Unfähigkeit loszulassen, halten Sie zurück.",
+            "Welche neue Perspektive könnte Ihnen helfen, Ihre aktuelle Situation zu lösen?"
+        ),
+        "13_death": (
+            "XIII. Der Tod", "Wasser",
+            "Transformation, Ende, Neuanfang, Loslassen",
+            "Etwas Altes geht zu Ende und macht Platz für Neues. Nehmen Sie den natürlichen Prozess der Veränderung an.",
+            "Die Angst, die Vergangenheit loszulassen, und das Festhalten an alten Mustern verhindern den Neubeginn.",
+            "Was müssen Sie endlich loslassen, um weitergehen zu können?"
+        ),
+        "14_temperance": (
+            "XIV. Die Mäßigkeit", "Feuer",
+            "Gleichgewicht, Geduld, Harmonie, Frieden",
+            "Suchen Sie den Mittelweg und das Gleichgewicht. Geduld und das Verbinden von Gegensätzen bringen Ruhe.",
+            "Extreme, Unausgeglichenheit oder mangelnde Geduld können Sie belasten. Verlangsamen Sie sich und finden Sie Ihre Balance.",
+            "In welchem Lebensbereich neigen Sie zu unnötigen Extremen?"
+        ),
+        "15_devil": (
+            "XV. Der Teufel", "Erde",
+            "Fesseln, Illusionen, Versuchung, Schatten",
+            "Erkennen Sie ungesunde Abhängigkeiten und einschränkende Überzeugungen. Den Schlüssel zur Freiheit halten Sie selbst in der Hand.",
+            "Sie können sich aus einem toxischen Umfeld befreien oder einen wichtigen Schritt zur Überwindung einer schlechten Gewohnheit machen.",
+            "Welche Illusion oder ungesunde Gewohnheit hält Sie innerlich gefangen?"
+        ),
+        "16_tower": (
+            "XVI. Der Turm", "Feuer",
+            "Plötzliche Veränderung, Blitz, Befreiung, Erwachen",
+            "Der Zusammenbruch falscher Sicherheiten öffnet den Weg zur Wahrheit. Eine Veränderung kann plötzlich, aber reinigend sein.",
+            "Das Aufschieben einer unvermeidlichen Veränderung oder die Angst, alte Strukturen aufzubrechen, hält Sie zurück.",
+            "Welche nicht mehr funktionierende Sicherheit in Ihrem Leben muss erneuert werden?"
+        ),
+        "17_star": (
+            "XVII. Der Stern", "Luft",
+            "Hoffnung, Inspiration, Heilung, Klarheit",
+            "Nach dem Sturm kehren Ruhe und Hoffnung zurück. Vertrauen Sie auf die Zukunft und auf die Kräfte, die Sie begleiten.",
+            "Vielleicht verlieren Sie den Glauben oder fühlen sich entmutigt. Denken Sie daran: Auch nach der dunkelsten Nacht wird es wieder hell.",
+            "Was schenkt Ihnen das stärkste Gefühl von Hoffnung und Ruhe?"
+        ),
+        "18_moon": (
+            "XVIII. Der Mond", "Wasser",
+            "Illusionen, Träume, Unsicherheit, Intuition",
+            "Die Dinge sind möglicherweise nicht so, wie sie scheinen. Gehen Sie durch den Nebel und vertrauen Sie Ihrem inneren Kompass.",
+            "Illusionen können sich auflösen, Ängste überwunden und verworrene Situationen geklärt werden.",
+            "Welche verborgene Angst hindert Sie daran, die Situation klar zu sehen?"
+        ),
+        "19_sun": (
+            "XIX. Die Sonne", "Feuer",
+            "Freude, Erfolg, Vitalität, Klarheit",
+            "Positive Energie begleitet Sie. Eine Zeit der Freude, des Erfolgs und der Lebenskraft erwartet Sie.",
+            "Vielleicht übersehen Sie vorübergehend das Positive. Die Sonne scheint weiterhin, auch wenn Wolken sie verdecken.",
+            "Wofür können Sie in diesem Augenblick besonders dankbar sein?"
+        ),
+        "20_judgement": (
+            "XX. Das Gericht", "Feuer",
+            "Erwachen, Ruf, Wiedergeburt, Klarheit",
+            "Ein Moment klarer Erkenntnis und der Befreiung von der Vergangenheit steht bevor. Hören Sie auf Ihren inneren Ruf.",
+            "Selbstzweifel, übermäßige Selbstkritik oder die Weigerung, ein altes Kapitel abzuschließen, können Sie zurückhalten.",
+            "In welche neue Lebensphase ruft Sie Ihr Inneres gerade?"
+        ),
+        "21_world": (
+            "XXI. Die Welt", "Erde",
+            "Vollendung, Integration, Erfüllung, Ganzheit",
+            "Sie haben Ihr Ziel erreicht und ein wichtiges Kapitel abgeschlossen. Genießen Sie das Gefühl der Ganzheit.",
+            "Unerledigte Angelegenheiten sind noch offen. Machen Sie den letzten Schritt, um den alten Zyklus abzuschließen.",
+            "Welchen Erfolg dürfen Sie heute feiern?"
+        )
+    },
+
+    "en": {
+        "0_fool": (
+            "0. The Fool", "Air",
+            "New beginnings, Trust, Spontaneity, Innocence",
+            "Today is a day for a new beginning. Do not be afraid to step into the unknown and trust that the universe will support you.",
+            "Beware of rushed decisions and naivety. Look twice before you leap.",
+            "What is stopping you from taking the first step toward your dream?"
+        ),
+        "1_magician": (
+            "I. The Magician", "Air",
+            "Manifestation, Willpower, Skills, Action",
+            "You have all the tools and resources you need to succeed. It is time to turn your intention into reality.",
+            "You may be doubting your abilities or scattering your attention. Focus on what truly matters.",
+            "Which hidden talent can you fully use today?"
+        ),
+        "2_high_priestess": (
+            "II. The High Priestess", "Water",
+            "Intuition, Inner voice, Mystery, Subconscious",
+            "Listen to your inner voice and the symbolism of your dreams. The answers are hidden in the silence within you.",
+            "You may be ignoring warning signs from your intuition. Pause and do not let the noise around you drown it out.",
+            "What is your quiet inner voice telling you that you keep overlooking?"
+        ),
+        "3_empress": (
+            "III. The Empress", "Earth",
+            "Abundance, Creativity, Care, Nature",
+            "A period of growth, creativity and fertility is approaching. Take care of yourself and notice the beauty around you.",
+            "You may be experiencing a creative block or neglecting your own needs for the sake of others. Restore your energy.",
+            "How can you show love and care to yourself today?"
+        ),
+        "4_emperor": (
+            "IV. The Emperor", "Fire",
+            "Structure, Authority, Stability, Boundaries",
+            "It is time to bring order into your life, set clear boundaries and take full responsibility for your direction.",
+            "Beware of excessive rigidity and control, or the opposite: chaos and a lack of self-discipline.",
+            "Where in your life do you need to establish stronger boundaries?"
+        ),
+        "5_hierophant": (
+            "V. The Hierophant", "Earth",
+            "Tradition, Wisdom, Learning, Spiritual guidance",
+            "Seek wisdom in established values or ask an experienced mentor for advice.",
+            "It may be time to question old doctrines and find your own individual path.",
+            "Which belief do you hold only because others taught it to you?"
+        ),
+        "6_lovers": (
+            "VI. The Lovers", "Air",
+            "Love, Choice, Harmony, Values",
+            "This card brings harmony to relationships and signals an important decision guided by the values of your heart.",
+            "Inner conflict or unbalanced relationships may be present. Clarify what you truly want.",
+            "Are you aligned with your most important life values?"
+        ),
+        "7_chariot": (
+            "VII. The Chariot", "Water",
+            "Triumph, Determination, Movement, Control",
+            "Focus on your goal and keep the reins firmly in your hands. Your determination can lead you to victory.",
+            "You may be losing control or pushing yourself too hard. Slow down and reconsider your direction.",
+            "Where are you directing your energy, and is it the right direction?"
+        ),
+        "8_strength": (
+            "VIII. Strength", "Fire",
+            "Patience, Inner strength, Compassion, Courage",
+            "True strength comes from gentleness, patience and mastering your own shadows and emotions.",
+            "You may be doubting yourself or feeling exhausted. Remember to be kind to yourself.",
+            "Which challenge can you overcome today with calmness and kindness?"
+        ),
+        "9_hermit": (
+            "IX. The Hermit", "Earth",
+            "Self-reflection, Solitude, Inner light, Searching",
+            "Give yourself time alone. In stillness, you may discover the light that guides your next steps.",
+            "You may be isolating yourself too much or feeling lonely. Do not be afraid to ask for help.",
+            "What might you discover if you switch off the noise around you for a moment?"
+        ),
+        "10_wheel": (
+            "X. Wheel of Fortune", "Fire",
+            "Destiny, Change, Cycles, Opportunity",
+            "Life is constantly moving. Accept change as an opportunity; fate may be turning in your favor.",
+            "Resisting change and holding on to things whose time has passed only makes the situation harder.",
+            "Which cycle in your life are you still resisting?"
+        ),
+        "11_justice": (
+            "XI. Justice", "Air",
+            "Truth, Balance, Cause and effect, Clarity",
+            "A fair outcome is approaching. Act in accordance with the truth and take responsibility.",
+            "Injustice, dishonesty or refusing to admit your own mistake may be present.",
+            "Are you being completely honest with yourself and others right now?"
+        ),
+        "12_hanged_man": (
+            "XII. The Hanged Man", "Water",
+            "New perspective, Pause, Surrender, Sacrifice",
+            "Sometimes the best step is to pause and look at the situation from a completely new point of view.",
+            "Unnecessary delays, a sense of victimhood or an inability to let things flow freely may be holding you back.",
+            "What new perspective could help you resolve your current situation?"
+        ),
+        "13_death": (
+            "XIII. Death", "Water",
+            "Transformation, Ending, New beginning, Release",
+            "Something old is ending to make room for something new. Accept the natural process of transformation.",
+            "Fear of leaving the past behind and holding on to old patterns can prevent new beginnings.",
+            "What do you finally need to let go of so you can move forward?"
+        ),
+        "14_temperance": (
+            "XIV. Temperance", "Fire",
+            "Balance, Patience, Harmony, Peace",
+            "Seek the middle path and balance. Patience and the gentle blending of opposites will bring calm.",
+            "Extremes, imbalance or a lack of patience may be affecting you. Slow down and restore your balance.",
+            "In which area of your life are you going to unnecessary extremes?"
+        ),
+        "15_devil": (
+            "XV. The Devil", "Earth",
+            "Bonds, Illusions, Temptation, Shadow",
+            "Recognize unhealthy dependencies and limiting beliefs. The key to freedom is in your own hands.",
+            "You may be freeing yourself from a toxic environment or making a breakthrough in overcoming a bad habit.",
+            "Which illusion or unhealthy habit is holding you back inside?"
+        ),
+        "16_tower": (
+            "XVI. The Tower", "Fire",
+            "Sudden change, Lightning, Liberation, Awakening",
+            "The collapse of false certainties opens the way to truth. Change may be sudden, but it can also be cleansing.",
+            "Putting off an inevitable change or fearing the breakdown of old structures may be holding you back.",
+            "Which false certainty in your life needs to be rebuilt?"
+        ),
+        "17_star": (
+            "XVII. The Star", "Air",
+            "Hope, Inspiration, Healing, Clarity",
+            "Calm and hope return after the storm. Trust in the future and in the higher forces supporting you.",
+            "You may be losing faith or feeling discouraged. Remember that even the darkest night gives way to dawn.",
+            "What gives you the greatest feeling of hope and peace?"
+        ),
+        "18_moon": (
+            "XVIII. The Moon", "Water",
+            "Illusions, Dreams, Uncertainty, Intuition",
+            "Things may not be as they appear. Move through the mist while trusting your inner compass.",
+            "Illusions may be clearing, fears may be overcome and a confusing situation may become clearer.",
+            "What hidden fear is preventing you from seeing the situation clearly?"
+        ),
+        "19_sun": (
+            "XIX. The Sun", "Fire",
+            "Joy, Success, Vitality, Clarity",
+            "Positive energy surrounds you. A period of joy, success and vitality lies ahead.",
+            "You may temporarily overlook the positive things. The sun is still shining, even when hidden behind clouds.",
+            "What can you be most grateful for at this moment?"
+        ),
+        "20_judgement": (
+            "XX. Judgement", "Fire",
+            "Awakening, Calling, Rebirth, Clarity",
+            "A moment of clear realization and release from the past is approaching. Listen to your higher calling.",
+            "Self-doubt, self-criticism or refusing to close an old chapter may be holding you back.",
+            "Toward which new phase of life is your inner self calling you now?"
+        ),
+        "21_world": (
+            "XXI. The World", "Earth",
+            "Completion, Integration, Fulfilment, Wholeness",
+            "You have reached your goal and completed an important chapter. Enjoy the feeling of wholeness.",
+            "Some matters remain unfinished. Take the final step toward closing the old cycle.",
+            "Which achievement deserves to be celebrated today?"
+        )
+    }
+}
+
+
+def get_translated_card(card, language, is_reversed):
+    """
+    Vrátí kartu v požadovaném jazyce.
+    Čeština používá původní obsah TAROT_DECK.
+    """
+    result = dict(card)
+
+    if language in ("de", "en"):
+        translation = TAROT_TRANSLATIONS.get(language, {}).get(card["id"])
+
+        if translation:
+            (
+                name,
+                element,
+                keywords,
+                meaning,
+                meaning_reversed,
+                question
+            ) = translation
+
+            result["name"] = name
+            result["element"] = element
+            result["keywords"] = keywords
+            result["meaning"] = meaning
+            result["meaning_reversed"] = meaning_reversed
+            result["question"] = question
+
+    if is_reversed:
+        result["name"] += MESSAGES[language]["reversed"]
+        result["meaning"] = result["meaning_reversed"]
+
+    return result
+
+
+# ---------------------------------------------------------
+# VALIDACE A POMOCNÉ FUNKCE
+# ---------------------------------------------------------
 
 EMAIL_RE = re.compile(r"^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$")
 
@@ -354,6 +721,7 @@ def _json_body():
         return None
 
     payload = request.get_json(silent=True)
+
     return payload if isinstance(payload, dict) else None
 
 
@@ -398,9 +766,9 @@ def _no_cache(response):
     return response
 
 
-# ============================================================
+# ---------------------------------------------------------
 # BEZPEČNOSTNÍ HLAVIČKY
-# ============================================================
+# ---------------------------------------------------------
 
 @app.after_request
 def add_security_headers(response):
@@ -419,62 +787,53 @@ def add_security_headers(response):
 
 @app.errorhandler(413)
 def request_too_large(_error):
+    language = get_language(request.args.get("lang", "de"))
+
     return jsonify({
         "status": "error",
-        "message": "Požadavek je příliš velký."
+        "message": MESSAGES[language]["too_large"]
     }), 413
 
 
-# ============================================================
+# ---------------------------------------------------------
 # HLAVNÍ STRÁNKA
-# ============================================================
+# ---------------------------------------------------------
 
 @app.route("/")
 def home():
-    language = get_language(request.args.get("lang"))
-
     return render_template(
         "index.html",
-        services=SERVICES,
-        language=language
+        services=SERVICES
     )
 
 
-# ============================================================
-# TAROT – NÁHODNÁ KARTA
+# ---------------------------------------------------------
+# DENNÍ TAROTOVÁ KARTA
 # GET /api/draw-card?lang=de
-# ============================================================
+# GET /api/draw-card?lang=cs
+# GET /api/draw-card?lang=en
+# ---------------------------------------------------------
 
 @app.route("/api/draw-card", methods=["GET"])
 def draw_card():
-    language = get_language(request.args.get("lang"))
+    language = get_language(request.args.get("lang", "de"))
 
     card = secrets.choice(TAROT_DECK)
     is_reversed = secrets.randbelow(100) < 20
 
-    card_name = card["name"]
-
-    if is_reversed:
-        if language == "de":
-            card_name += " (Umgekehrt)"
-        elif language == "en":
-            card_name += " (Reversed)"
-        else:
-            card_name += " (Obrácená)"
-
-    meaning = (
-        card["meaning_reversed"]
-        if is_reversed
-        else card["meaning"]
+    translated_card = get_translated_card(
+        card,
+        language,
+        is_reversed
     )
 
     response = jsonify({
-        "id": card["id"],
-        "name": card_name,
-        "element": card["element"],
-        "keywords": card["keywords"],
-        "meaning": meaning,
-        "question": card["question"],
+        "id": translated_card["id"],
+        "name": translated_card["name"],
+        "element": translated_card["element"],
+        "keywords": translated_card["keywords"],
+        "meaning": translated_card["meaning"],
+        "question": translated_card["question"],
         "is_reversed": is_reversed,
         "language": language
     })
@@ -482,30 +841,27 @@ def draw_card():
     return _no_cache(response)
 
 
-# ============================================================
-# GENEROVÁNÍ SEPA QR KÓDU
-# POST /api/generate-qr
-# ============================================================
+# ---------------------------------------------------------
+# GENEROVÁNÍ SEPA / REVOLUT QR KÓDU
+# ---------------------------------------------------------
 
 @app.route("/api/generate-qr", methods=["POST"])
 def generate_qr():
+    language = get_language(request.args.get("lang", "de"))
     data = _json_body()
 
     if data is None:
-        language = DEFAULT_LANGUAGE
         return jsonify({
             "status": "error",
-            "message": message("invalid_json", language)
+            "message": MESSAGES[language]["invalid_json"]
         }), 400
-
-    language = get_language(data.get("lang"))
 
     service_id = data.get("service_id", "tarot_basic")
 
     if not _valid_service(service_id):
         return jsonify({
             "status": "error",
-            "message": message("invalid_service", language)
+            "message": MESSAGES[language]["invalid_service"]
         }), 400
 
     service = SERVICES[service_id]
@@ -514,13 +870,13 @@ def generate_qr():
         str(service["price"])
     ).quantize(Decimal("0.01"))
 
+    message = service["title"][:35]
     payment_reference = _make_reference("MS")
 
-    payment_message = (
-        f"{service['title'][:25]} Ref:{payment_reference}"
-    )
+    # EPC / SEPA QR.
+    # QR kód pouze připraví platební příkaz.
+    # Platba se musí následně ověřit ručně v Revolutu.
 
-    # EPC / SEPA QR formát
     sepa_string = (
         "BCD\n"
         "002\n"
@@ -532,7 +888,7 @@ def generate_qr():
         f"EUR{amount:.2f}\n"
         "\n"
         "\n"
-        f"{payment_message}"
+        f"{message} Ref:{payment_reference}"
     )
 
     qr = qrcode.QRCode(
@@ -550,16 +906,16 @@ def generate_qr():
         back_color="#ffffff"
     )
 
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
 
-    qr_b64 = base64.b64encode(
-        buf.getvalue()
+    qr_base64 = base64.b64encode(
+        buffer.getvalue()
     ).decode("ascii")
 
     response = jsonify({
         "status": "success",
-        "qr_image": f"data:image/png;base64,{qr_b64}",
+        "qr_image": f"data:image/png;base64,{qr_base64}",
         "title": service["title"],
         "price": f"{amount:.2f} EUR",
         "iban": REVOLUT_IBAN,
@@ -568,28 +924,26 @@ def generate_qr():
         "payment_reference": payment_reference,
         "service_id": service_id,
         "payment_status": "pending_manual_confirmation",
-        "payment_notice": message("payment_notice", language)
+        "payment_notice": MESSAGES[language]["payment_notice"]
     })
 
     return _no_cache(response)
 
 
-# ============================================================
+# ---------------------------------------------------------
 # REZERVACE A ODESLÁNÍ E-MAILU PŘES RESEND
-# POST /api/reserve
-# ============================================================
+# ---------------------------------------------------------
 
 @app.route("/api/reserve", methods=["POST"])
 def reserve():
+    language = get_language(request.args.get("lang", "de"))
     data = _json_body()
 
     if data is None:
         return jsonify({
             "status": "error",
-            "message": message("invalid_json")
+            "message": MESSAGES[language]["invalid_json"]
         }), 400
-
-    language = get_language(data.get("lang"))
 
     try:
         email = _clean_text(
@@ -622,13 +976,13 @@ def reserve():
     if not _valid_email(email):
         return jsonify({
             "status": "error",
-            "message": message("invalid_email", language)
+            "message": MESSAGES[language]["invalid_email"]
         }), 400
 
     if not _valid_service(service_key):
         return jsonify({
             "status": "error",
-            "message": message("invalid_service", language)
+            "message": MESSAGES[language]["invalid_service"]
         }), 400
 
     if payment_reference and not re.fullmatch(
@@ -637,7 +991,7 @@ def reserve():
     ):
         return jsonify({
             "status": "error",
-            "message": message("invalid_reference", language)
+            "message": "Reference platby nemá platný formát."
         }), 400
 
     service_info = SERVICES[service_key]
@@ -652,11 +1006,10 @@ def reserve():
 
     payment_line = (
         payment_reference
-        if payment_reference
-        else "Zatím nebyla předána – spárování platby je nutné ověřit ručně."
+        or "Zatím nebyla předána – spárování platby je nutné ověřit ručně."
     )
 
-    # Bezpečné escapování zákaznických údajů pro HTML e-mail
+    # Ochrana HTML e-mailu před vložením nebezpečného obsahu.
     safe_email = escape(email)
     safe_note = escape(note) if note else "Bez poznámky"
     safe_service_title = escape(service_title)
@@ -709,8 +1062,8 @@ def reserve():
         </p>
 
         <p>
-            Ověřte připsání částky na Revolutu před potvrzením
-            objednávky zákazníkovi.
+            Ověřte připsání částky na Revolutu
+            před potvrzením objednávky zákazníkovi.
         </p>
     </div>
     """
@@ -723,7 +1076,7 @@ def reserve():
 
         return jsonify({
             "status": "error",
-            "message": message("email_unavailable", language)
+            "message": MESSAGES[language]["reservation_error"]
         }), 503
 
     try:
@@ -732,7 +1085,8 @@ def reserve():
             "to": [ADMIN_EMAIL],
             "reply_to": email,
             "subject": (
-                f"Nová objednávka {reservation_reference} – {service_title}"
+                f"Nová objednávka {reservation_reference} – "
+                f"{service_title}"
             ),
             "html": admin_html
         })
@@ -744,7 +1098,7 @@ def reserve():
 
         return jsonify({
             "status": "error",
-            "message": message("email_failed", language)
+            "message": MESSAGES[language]["send_error"]
         }), 502
 
     response = jsonify({
@@ -752,15 +1106,20 @@ def reserve():
         "reference": reservation_reference,
         "payment_reference": payment_reference or None,
         "payment_status": "pending_manual_confirmation",
-        "message": message("reservation_received", language)
+        "message": (
+            f"Poptávka {reservation_reference} byla přijata. "
+            "Platba zatím není potvrzena; objednávku ověříme "
+            "ručně po připsání peněz. "
+            "Termín bude domluven individuálně."
+        )
     })
 
     return _no_cache(response)
 
 
-# ============================================================
-# SPUŠTĚNÍ APLIKACE
-# ============================================================
+# ---------------------------------------------------------
+# LOKÁLNÍ SPUŠTĚNÍ
+# ---------------------------------------------------------
 
 if __name__ == "__main__":
     app.run(
