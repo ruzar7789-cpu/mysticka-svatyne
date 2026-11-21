@@ -1,71 +1,106 @@
 
 import io
 import base64
-import random
-import secrets
 import os
 import re
+import secrets
 import logging
 from html import escape
+from decimal import Decimal
 
 from flask import Flask, render_template, request, jsonify
 import qrcode
 import resend
 
 
-# =========================================================
-# APLIKACE
-# =========================================================
+# ============================================================
+# MYSTICKÁ SVATYNĚ – TAROT & ASTRO
+# Backend: Flask / Python
+# Bez databáze a bez zákaznických hesel
+# ============================================================
 
-app = Flask(__name__, template_folder="../templates")
-
+app = Flask(__name__, template_folder='../templates')
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Původní platební údaje – zachované
+REVOLUT_IBAN = "LT803250069633761109"
+REVOLUT_BIC = "REVOLT21"
+BENEFICIARY_NAME = "Mystická Svatyně"
 
-# V produkci nikdy nezapínat debug režim.
-app.config["DEBUG"] = False
+# Původní administrátorský e-mail – zachovaný
+ADMIN_EMAIL = "ruzar7789@gmail.com"
 
+# Odesílatel e-mailů
+RESEND_FROM = "Mystická Svatyně <onboarding@resend.dev>"
 
-# =========================================================
-# KONFIGURACE
-# =========================================================
+# Tajný API klíč Resend ponecháváme ve Vercelu
+resend.api_key = os.getenv("RESEND_API_KEY", "")
 
-REVOLUT_IBAN = os.getenv(
-    "REVOLUT_IBAN",
-    "LT803250069633761109"
-)
-
-REVOLUT_BIC = os.getenv(
-    "REVOLUT_BIC",
-    "REVOLT21"
-)
-
-BENEFICIARY_NAME = os.getenv(
-    "PAYMENT_BENEFICIARY",
-    "Mystická Svatyně"
-)
-
-ADMIN_EMAIL = os.getenv(
-    "ADMIN_EMAIL",
-    "ruzar7789@gmail.com"
-)
-
-RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
-
-RESEND_FROM = os.getenv(
-    "RESEND_FROM",
-    "Mystická Svatyně <onboarding@resend.dev>"
-)
-
-if RESEND_API_KEY:
-    resend.api_key = RESEND_API_KEY
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
+logger = logging.getLogger("mysticka_svatyne")
 
 
-# =========================================================
-# SLUŽBY
-# =========================================================
+# ============================================================
+# JAZYKY
+# ============================================================
+
+SUPPORTED_LANGUAGES = ("de", "cs", "en")
+DEFAULT_LANGUAGE = "de"
+
+MESSAGES = {
+    "de": {
+        "invalid_json": "Die Anfrage enthält keine gültigen JSON-Daten.",
+        "invalid_service": "Der ausgewählte Dienst ist ungültig.",
+        "invalid_email": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+        "invalid_reference": "Die Zahlungsreferenz hat ein ungültiges Format.",
+        "invalid_request": "Die Anfrage ist ungültig.",
+        "email_unavailable": "Die Reservierung kann derzeit nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+        "email_failed": "Die Reservierung konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+        "payment_notice": "Die Zahlung wird erst nach manueller Prüfung des Zahlungseingangs bestätigt.",
+        "pending": "Die Zahlung wartet auf manuelle Bestätigung.",
+        "reservation_received": "Ihre Anfrage wurde angenommen. Die Zahlung ist noch nicht bestätigt. Wir prüfen den Zahlungseingang manuell. Der Termin wird individuell vereinbart."
+    },
+    "cs": {
+        "invalid_json": "Požadavek musí obsahovat platná JSON data.",
+        "invalid_service": "Vybraná služba není platná.",
+        "invalid_email": "Zadejte platnou e-mailovou adresu.",
+        "invalid_reference": "Reference platby nemá platný formát.",
+        "invalid_request": "Požadavek není platný.",
+        "email_unavailable": "Rezervaci nyní nelze odeslat. Zkuste to prosím později.",
+        "email_failed": "Odeslání rezervace se nezdařilo. Zkuste to prosím později.",
+        "payment_notice": "Platba bude potvrzena až po ruční kontrole připsání peněz.",
+        "pending": "Platba čeká na ruční potvrzení.",
+        "reservation_received": "Vaše poptávka byla přijata. Platba zatím není potvrzena. Připsání peněz ověříme ručně. Termín bude domluven individuálně."
+    },
+    "en": {
+        "invalid_json": "The request must contain valid JSON data.",
+        "invalid_service": "The selected service is invalid.",
+        "invalid_email": "Please enter a valid email address.",
+        "invalid_reference": "The payment reference has an invalid format.",
+        "invalid_request": "The request is invalid.",
+        "email_unavailable": "The reservation cannot be sent right now. Please try again later.",
+        "email_failed": "The reservation could not be sent. Please try again later.",
+        "payment_notice": "Payment will only be confirmed after manual verification of the incoming transfer.",
+        "pending": "Payment is awaiting manual confirmation.",
+        "reservation_received": "Your request has been received. Payment is not yet confirmed. We will manually verify the incoming transfer. The appointment will be arranged individually."
+    }
+}
+
+
+def get_language(value=None):
+    if isinstance(value, str):
+        value = value.lower().strip()
+    return value if value in SUPPORTED_LANGUAGES else DEFAULT_LANGUAGE
+
+
+def message(key, language=None):
+    language = get_language(language)
+    return MESSAGES[language].get(key, MESSAGES[DEFAULT_LANGUAGE].get(key, key))
+
+
+# ============================================================
+# SLUŽBY – PŮVODNÍ ID A CENY ZACHOVÁNY
+# ============================================================
 
 SERVICES = {
     "tarot_basic": {
@@ -101,19 +136,9 @@ SERVICES = {
 }
 
 
-# Krátké kódy služeb pro platební reference.
-SERVICE_CODES = {
-    "tarot_basic": "TB",
-    "tarot_full": "TF",
-    "ritual_love": "RL",
-    "ritual_protection": "RP",
-    "consultation_vip": "CV"
-}
-
-
-# =========================================================
-# TAROT – 22 KARET VELKÉ ARKÁNY
-# =========================================================
+# ============================================================
+# TAROT – VŠECH 22 KARET
+# ============================================================
 
 TAROT_DECK = [
     {
@@ -220,7 +245,7 @@ TAROT_DECK = [
         "name": "XI. Spravedlnost",
         "element": "Vzduch",
         "keywords": "Pravda, Rovnováha, Příčina a následek, Jasnost",
-        "meaning": "Čeká vás spravedlivé vyúštění situace. Jednejte v souladu s pravdou a převezměte odpovědnost.",
+        "meaning": "Čeká vás spravedlivé vyústění situace. Jednejte v souladu s pravdou a převezměte odpovědnost.",
         "meaning_reversed": "Nespravedlnost, neupřímnost nebo odmítání přiznat si vlastní chybu.",
         "question": "Jste k sobě i k druhým v tuto chvíli zcela upřímní?"
     },
@@ -317,208 +342,125 @@ TAROT_DECK = [
 ]
 
 
-# =========================================================
+# ============================================================
 # POMOCNÉ FUNKCE
-# =========================================================
+# ============================================================
 
-EMAIL_PATTERN = re.compile(
-    r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
-)
+EMAIL_RE = re.compile(r"^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$")
 
 
-def get_json_data():
-    """Bezpečně načte JSON objekt z požadavku."""
-    data = request.get_json(silent=True)
-
-    if not isinstance(data, dict):
+def _json_body():
+    if not request.is_json:
         return None
 
-    return data
+    payload = request.get_json(silent=True)
+    return payload if isinstance(payload, dict) else None
 
 
-def validate_email(email):
-    """Základní kontrola e-mailové adresy."""
-    if not isinstance(email, str):
-        return False
+def _clean_text(value, *, max_length, field_name, required=False):
+    if value is None:
+        value = ""
 
-    email = email.strip()
+    if not isinstance(value, str):
+        raise ValueError(f"Pole {field_name} musí být text.")
 
-    if len(email) > 254:
-        return False
+    value = value.strip()
 
-    return bool(EMAIL_PATTERN.fullmatch(email))
+    if required and not value:
+        raise ValueError(f"Vyplňte pole {field_name}.")
 
-
-def get_payment_reference(service_key):
-    """
-    Vytvoří referenci ve tvaru MS-TB-123456.
-
-    Reference se neukládá do databáze.
-    Je určena pro ruční spárování platby.
-    """
-    service_code = SERVICE_CODES[service_key]
-    number = secrets.randbelow(900000) + 100000
-
-    return f"MS-{service_code}-{number}"
-
-
-def normalize_payment_reference(reference, service_key):
-    """
-    Přijme buď plnou referenci MS-TB-123456,
-    nebo samotný šestimístný kód ze staršího frontendu.
-    """
-    if not isinstance(reference, str):
-        return None
-
-    reference = reference.strip().upper()
-
-    if re.fullmatch(r"\d{6}", reference):
-        reference = (
-            f"MS-{SERVICE_CODES[service_key]}-{reference}"
+    if len(value) > max_length:
+        raise ValueError(
+            f"Pole {field_name} je příliš dlouhé "
+            f"(maximum {max_length} znaků)."
         )
 
-    expected_prefix = f"MS-{SERVICE_CODES[service_key]}-"
-
-    if not reference.startswith(expected_prefix):
-        return None
-
-    if not re.fullmatch(
-        rf"MS-{SERVICE_CODES[service_key]}-\d{{6}}",
-        reference
-    ):
-        return None
-
-    return reference
+    return value
 
 
-def create_epc_payload(service, payment_reference):
-    """
-    Vytvoří EPC SEPA QR payload.
-
-    Reference je vložena do nestrukturované
-    remittance zprávy (max. 140 znaků).
-    """
-    amount = service["price"]
-
-    payload = "\n".join([
-        "BCD",
-        "002",
-        "1",
-        "SCT",
-        REVOLUT_BIC,
-        BENEFICIARY_NAME,
-        REVOLUT_IBAN,
-        f"EUR{amount:.2f}",
-        "",
-        "",
-        payment_reference,
-        ""
-    ])
-
-    # EPC payload má limit 331 bajtů.
-    if len(payload.encode("utf-8")) > 331:
-        raise ValueError("EPC QR payload překračuje povolenou délku.")
-
-    return payload
+def _valid_email(value):
+    return bool(EMAIL_RE.fullmatch(value)) and len(value) <= 254
 
 
-def create_qr_image(payload):
-    """Vygeneruje QR kód s vysokým kontrastem."""
-    qr = qrcode.QRCode(
-        version=None,
-        error_correction=qrcode.constants.ERROR_CORRECT_M,
-        box_size=8,
-        border=4
+def _valid_service(service_id):
+    return isinstance(service_id, str) and service_id in SERVICES
+
+
+def _make_reference(prefix="MS"):
+    return f"{prefix}-{secrets.token_hex(4).upper()}"
+
+
+def _no_cache(response):
+    response.headers["Cache-Control"] = (
+        "no-store, no-cache, must-revalidate, max-age=0"
     )
-
-    qr.add_data(payload)
-    qr.make(fit=True)
-
-    # Černá na bílé pro co nejlepší čitelnost
-    # v bankovních aplikacích.
-    img = qr.make_image(
-        fill_color="black",
-        back_color="white"
-    )
-
-    buffer = io.BytesIO()
-    img.save(buffer, format="PNG")
-
-    return base64.b64encode(
-        buffer.getvalue()
-    ).decode("utf-8")
-
-
-def safe_html_text(value):
-    """Escapuje uživatelský text před vložením do HTML."""
-    return escape(str(value), quote=True)
-
-
-# =========================================================
-# BEZPEČNOSTNÍ HLAVIČKY
-# =========================================================
-
-@app.after_request
-def add_security_headers(response):
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "SAMEORIGIN"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = (
-        "camera=(), microphone=(), geolocation=()"
-    )
-
+    response.headers["Pragma"] = "no-cache"
     return response
 
 
-# =========================================================
-# CHYBOVÉ ODPOVĚDI
-# =========================================================
+# ============================================================
+# BEZPEČNOSTNÍ HLAVIČKY
+# ============================================================
+
+@app.after_request
+def add_security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault(
+        "Referrer-Policy",
+        "strict-origin-when-cross-origin"
+    )
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault(
+        "Permissions-Policy",
+        "camera=(), microphone=(), geolocation=()"
+    )
+    return response
+
 
 @app.errorhandler(413)
-def request_too_large(error):
+def request_too_large(_error):
     return jsonify({
         "status": "error",
-        "message": "Odeslaná data jsou příliš velká."
+        "message": "Požadavek je příliš velký."
     }), 413
 
 
-@app.errorhandler(500)
-def internal_server_error(error):
-    logger.exception("Interní chyba aplikace.")
-
-    return jsonify({
-        "status": "error",
-        "message": "Na serveru došlo k chybě. Zkuste to prosím později."
-    }), 500
-
-
-# =========================================================
+# ============================================================
 # HLAVNÍ STRÁNKA
-# =========================================================
+# ============================================================
 
 @app.route("/")
 def home():
+    language = get_language(request.args.get("lang"))
+
     return render_template(
         "index.html",
-        services=SERVICES
+        services=SERVICES,
+        language=language
     )
 
 
-# =========================================================
-# TAROT – VÝBĚR KARTY
-# =========================================================
+# ============================================================
+# TAROT – NÁHODNÁ KARTA
+# GET /api/draw-card?lang=de
+# ============================================================
 
 @app.route("/api/draw-card", methods=["GET"])
 def draw_card():
-    card = random.choice(TAROT_DECK)
+    language = get_language(request.args.get("lang"))
 
-    is_reversed = random.random() < 0.20
+    card = secrets.choice(TAROT_DECK)
+    is_reversed = secrets.randbelow(100) < 20
 
-    card_name = (
-        f"{card['name']} (Obrácená)"
-        if is_reversed
-        else card["name"]
-    )
+    card_name = card["name"]
+
+    if is_reversed:
+        if language == "de":
+            card_name += " (Umgekehrt)"
+        elif language == "en":
+            card_name += " (Reversed)"
+        else:
+            card_name += " (Obrácená)"
 
     meaning = (
         card["meaning_reversed"]
@@ -526,228 +468,216 @@ def draw_card():
         else card["meaning"]
     )
 
-    return jsonify({
+    response = jsonify({
         "id": card["id"],
         "name": card_name,
         "element": card["element"],
         "keywords": card["keywords"],
         "meaning": meaning,
         "question": card["question"],
-        "is_reversed": is_reversed
+        "is_reversed": is_reversed,
+        "language": language
     })
 
+    return _no_cache(response)
 
-# =========================================================
-# GENEROVÁNÍ PLATEBNÍHO QR
-# =========================================================
+
+# ============================================================
+# GENEROVÁNÍ SEPA QR KÓDU
+# POST /api/generate-qr
+# ============================================================
 
 @app.route("/api/generate-qr", methods=["POST"])
 def generate_qr():
-    data = get_json_data()
+    data = _json_body()
 
     if data is None:
+        language = DEFAULT_LANGUAGE
         return jsonify({
             "status": "error",
-            "message": "Neplatná data požadavku."
+            "message": message("invalid_json", language)
         }), 400
+
+    language = get_language(data.get("lang"))
 
     service_id = data.get("service_id", "tarot_basic")
 
-    if not isinstance(service_id, str):
+    if not _valid_service(service_id):
         return jsonify({
             "status": "error",
-            "message": "Neplatný výběr služby."
+            "message": message("invalid_service", language)
         }), 400
 
-    service = SERVICES.get(service_id)
+    service = SERVICES[service_id]
 
-    if service is None:
-        return jsonify({
-            "status": "error",
-            "message": "Vybraná služba neexistuje."
-        }), 400
+    amount = Decimal(
+        str(service["price"])
+    ).quantize(Decimal("0.01"))
 
-    try:
-        payment_reference = get_payment_reference(service_id)
+    payment_reference = _make_reference("MS")
 
-        payload = create_epc_payload(
-            service,
-            payment_reference
-        )
+    payment_message = (
+        f"{service['title'][:25]} Ref:{payment_reference}"
+    )
 
-        qr_base64 = create_qr_image(payload)
+    # EPC / SEPA QR formát
+    sepa_string = (
+        "BCD\n"
+        "002\n"
+        "1\n"
+        "SCT\n"
+        f"{REVOLUT_BIC}\n"
+        f"{BENEFICIARY_NAME}\n"
+        f"{REVOLUT_IBAN}\n"
+        f"EUR{amount:.2f}\n"
+        "\n"
+        "\n"
+        f"{payment_message}"
+    )
 
-        # Samotný šestimístný kód kvůli kompatibilitě
-        # se starší verzí frontendu.
-        short_reference = payment_reference[-6:]
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=8,
+        border=4
+    )
 
-        return jsonify({
-            "status": "success",
-            "qr_image": f"data:image/png;base64,{qr_base64}",
-            "title": service["title"],
-            "price": f"{service['price']:.2f} EUR",
-            "iban": REVOLUT_IBAN,
-            "bic": REVOLUT_BIC,
-            "vs": short_reference,
-            "payment_reference": payment_reference,
-            "service_id": service_id
-        })
+    qr.add_data(sepa_string)
+    qr.make(fit=True)
 
-    except Exception:
-        logger.exception("Chyba při generování QR.")
+    img = qr.make_image(
+        fill_color="#160d24",
+        back_color="#ffffff"
+    )
 
-        return jsonify({
-            "status": "error",
-            "message": "QR kód se nepodařilo vytvořit."
-        }), 500
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+
+    qr_b64 = base64.b64encode(
+        buf.getvalue()
+    ).decode("ascii")
+
+    response = jsonify({
+        "status": "success",
+        "qr_image": f"data:image/png;base64,{qr_b64}",
+        "title": service["title"],
+        "price": f"{amount:.2f} EUR",
+        "iban": REVOLUT_IBAN,
+        "bic": REVOLUT_BIC,
+        "vs": payment_reference,
+        "payment_reference": payment_reference,
+        "service_id": service_id,
+        "payment_status": "pending_manual_confirmation",
+        "payment_notice": message("payment_notice", language)
+    })
+
+    return _no_cache(response)
 
 
-# =========================================================
-# REZERVACE A E-MAIL
-# =========================================================
+# ============================================================
+# REZERVACE A ODESLÁNÍ E-MAILU PŘES RESEND
+# POST /api/reserve
+# ============================================================
 
 @app.route("/api/reserve", methods=["POST"])
 def reserve():
-    data = get_json_data()
+    data = _json_body()
 
     if data is None:
         return jsonify({
             "status": "error",
-            "message": "Neplatná data požadavku."
+            "message": message("invalid_json")
         }), 400
 
-    email = data.get("email", "")
-    service_key = data.get("service", "tarot_basic")
-    note = data.get("note", "")
-    payment_reference = data.get("payment_reference", "")
+    language = get_language(data.get("lang"))
 
-    # -----------------------------------------------------
-    # VALIDACE E-MAILU
-    # -----------------------------------------------------
+    try:
+        email = _clean_text(
+            data.get("email"),
+            max_length=254,
+            field_name="e-mail",
+            required=True
+        )
 
-    if not isinstance(email, str):
+        service_key = data.get("service", "tarot_basic")
+
+        note = _clean_text(
+            data.get("note"),
+            max_length=2000,
+            field_name="poznámka"
+        )
+
+        payment_reference = _clean_text(
+            data.get("payment_reference"),
+            max_length=32,
+            field_name="reference platby"
+        )
+
+    except ValueError as exc:
         return jsonify({
             "status": "error",
-            "message": "Zadejte platnou e-mailovou adresu."
+            "message": str(exc)
         }), 400
 
-    email = email.strip()
-
-    if not validate_email(email):
+    if not _valid_email(email):
         return jsonify({
             "status": "error",
-            "message": "Zadejte platnou e-mailovou adresu."
+            "message": message("invalid_email", language)
         }), 400
 
-    # -----------------------------------------------------
-    # VALIDACE SLUŽBY
-    # -----------------------------------------------------
-
-    if not isinstance(service_key, str):
+    if not _valid_service(service_key):
         return jsonify({
             "status": "error",
-            "message": "Neplatná služba."
+            "message": message("invalid_service", language)
         }), 400
 
-    service_info = SERVICES.get(service_key)
-
-    if service_info is None:
+    if payment_reference and not re.fullmatch(
+        r"MS-[A-F0-9]{8}",
+        payment_reference
+    ):
         return jsonify({
             "status": "error",
-            "message": "Vybraná služba neexistuje."
+            "message": message("invalid_reference", language)
         }), 400
 
-    # -----------------------------------------------------
-    # VALIDACE POZNÁMKY
-    # -----------------------------------------------------
-
-    if not isinstance(note, str):
-        return jsonify({
-            "status": "error",
-            "message": "Neplatná poznámka."
-        }), 400
-
-    note = note.strip()
-
-    if len(note) > 3000:
-        return jsonify({
-            "status": "error",
-            "message": "Poznámka je příliš dlouhá."
-        }), 400
-
-    # -----------------------------------------------------
-    # VALIDACE PLATEBNÍ REFERENCE
-    # -----------------------------------------------------
-
-    payment_reference = normalize_payment_reference(
-        payment_reference,
-        service_key
-    )
-
-    if payment_reference is None:
-        return jsonify({
-            "status": "error",
-            "message": (
-                "Chybí platná platební reference. "
-                "Vygenerujte prosím nový QR kód."
-            )
-        }), 400
-
-    # -----------------------------------------------------
-    # KONTROLA RESEND
-    # -----------------------------------------------------
-
-    if not RESEND_API_KEY:
-        logger.error("Chybí RESEND_API_KEY.")
-
-        return jsonify({
-            "status": "error",
-            "message": (
-                "Odesílání objednávek není momentálně "
-                "nastaveno. Zkuste to později."
-            )
-        }), 503
-
-    # -----------------------------------------------------
-    # PŘÍPRAVA OBJEDNÁVKY
-    # -----------------------------------------------------
+    service_info = SERVICES[service_key]
 
     service_title = service_info["title"]
-    price = f"{service_info['price']:.2f} EUR"
 
-    # Číslo objednávky je stejné jako platební reference.
-    # Bez databáze se nikam trvale neukládá.
-    reference_number = payment_reference
+    price = (
+        f"{Decimal(str(service_info['price'])).quantize(Decimal('0.01')):.2f} EUR"
+    )
 
-    safe_email = safe_html_text(email)
-    safe_title = safe_html_text(service_title)
-    safe_price = safe_html_text(price)
-    safe_reference = safe_html_text(reference_number)
+    reservation_reference = _make_reference("RES")
 
-    safe_note = safe_html_text(note) if note else "Bez poznámky"
-    safe_note = safe_note.replace("\n", "<br>")
+    payment_line = (
+        payment_reference
+        if payment_reference
+        else "Zatím nebyla předána – spárování platby je nutné ověřit ručně."
+    )
+
+    # Bezpečné escapování zákaznických údajů pro HTML e-mail
+    safe_email = escape(email)
+    safe_note = escape(note) if note else "Bez poznámky"
+    safe_service_title = escape(service_title)
+    safe_price = escape(price)
+    safe_reservation_reference = escape(reservation_reference)
+    safe_payment_line = escape(payment_line)
 
     admin_html = f"""
     <div style="
-        font-family: Arial, sans-serif;
-        padding: 24px;
-        background-color: #0a0512;
-        color: #f3e8ff;
-        border: 1px solid #d4af37;
-        border-radius: 12px;
+        font-family:Arial,sans-serif;
+        padding:24px;
+        background:#10091b;
+        color:#f3e8ff;
     ">
-        <h2 style="color: #d4af37;">
-            Nová objednávka
+        <h2 style="color:#d4af37;">
+            Nová objednávka {safe_reservation_reference}
         </h2>
 
         <p>
-            <strong>Číslo objednávky:</strong>
-            {safe_reference}
-        </p>
-
-        <p>
-            <strong>Vybraná služba:</strong>
-            {safe_title}
+            <strong>Služba:</strong>
+            {safe_service_title}
         </p>
 
         <p>
@@ -761,35 +691,40 @@ def reserve():
         </p>
 
         <p>
-            <strong>Platební reference:</strong>
-            {safe_reference}
+            <strong>Reference platby:</strong>
+            {safe_payment_line}
         </p>
 
         <p>
-            <strong>Poznámka / Dotaz:</strong><br>
+            <strong>Poznámka / záměr:</strong><br>
             {safe_note}
         </p>
 
-        <hr style="border: 1px solid #d4af37;">
+        <hr style="border:0;border-top:1px solid #d4af37;">
 
-        <p style="color: #e7c96a;">
-            Stav objednávky: ČEKÁ NA RUČNÍ OVĚŘENÍ PLATBY
+        <p style="color:#f0c96b;">
+            <strong>
+                Stav: čeká na ruční kontrolu platby.
+            </strong>
         </p>
 
         <p>
-            Zkontrolujte platbu v Revolutu podle platební reference.
-        </p>
-
-        <p>
-            Pro odpověď zákazníkovi použijte tlačítko
-            Odpovědět ve své e-mailové aplikaci.
+            Ověřte připsání částky na Revolutu před potvrzením
+            objednávky zákazníkovi.
         </p>
     </div>
     """
 
-    # -----------------------------------------------------
-    # ODESLÁNÍ E-MAILU
-    # -----------------------------------------------------
+    if not resend.api_key:
+        logger.error(
+            "RESEND_API_KEY není nastaven; "
+            "objednávku nelze e-mailem předat administrátorovi."
+        )
+
+        return jsonify({
+            "status": "error",
+            "message": message("email_unavailable", language)
+        }), 503
 
     try:
         resend.Emails.send({
@@ -797,50 +732,39 @@ def reserve():
             "to": [ADMIN_EMAIL],
             "reply_to": email,
             "subject": (
-                f"Nová objednávka {reference_number} - {service_title}"
+                f"Nová objednávka {reservation_reference} – {service_title}"
             ),
-            "html": admin_html,
-            "text": (
-                f"Nová objednávka: {reference_number}\n"
-                f"Služba: {service_title}\n"
-                f"Cena: {price}\n"
-                f"E-mail: {email}\n"
-                f"Platební reference: {reference_number}\n"
-                f"Poznámka: {note or 'Bez poznámky'}\n\n"
-                "Stav: Čeká na ruční ověření platby."
-            )
-        })
-
-        return jsonify({
-            "status": "success",
-            "message": (
-                f"Objednávka {reference_number} byla přijata. "
-                "Čeká na ruční ověření platby. "
-                "Potvrzení objednávky obdržíte po kontrole platby."
-            ),
-            "reference_number": reference_number,
-            "payment_status": "pending"
+            "html": admin_html
         })
 
     except Exception:
-        logger.exception("Chyba při odesílání objednávky přes Resend.")
+        logger.exception(
+            "Odeslání objednávky přes Resend selhalo."
+        )
 
         return jsonify({
             "status": "error",
-            "message": (
-                "Objednávku se nepodařilo odeslat. "
-                "Zkuste to prosím později."
-            )
-        }), 500
+            "message": message("email_failed", language)
+        }), 502
+
+    response = jsonify({
+        "status": "success",
+        "reference": reservation_reference,
+        "payment_reference": payment_reference or None,
+        "payment_status": "pending_manual_confirmation",
+        "message": message("reservation_received", language)
+    })
+
+    return _no_cache(response)
 
 
-# =========================================================
-# LOKÁLNÍ SPUŠTĚNÍ
-# =========================================================
+# ============================================================
+# SPUŠTĚNÍ APLIKACE
+# ============================================================
 
 if __name__ == "__main__":
     app.run(
-        host="0.0.0.0",
+        host="127.0.0.1",
         port=int(os.getenv("PORT", "5000")),
         debug=False
     )
