@@ -1,28 +1,27 @@
+
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- SEO -->
+
     <title>Mystická Svatyně | Osobní výklad Tarotu a Rituály online</title>
     <meta name="description" content="Online výklad tarotu, roční horoskopy a mistrovské rituály pro harmonizaci vztahů a osobní ochranu. Získejte jasnost a vedení pro váš život.">
     <meta name="keywords" content="výklad tarotu, tarot online, kartářka, rituál lásky, energetická očista, horoskop, věštění, rituály">
     <meta name="robots" content="index, follow">
+    <meta name="google-site-verification" content="2ZAu0AzVD4zouytP19c8g_1SBi3K1SaWj769fs_Xsr4">
 
-    <!-- Google Search Console Ověření -->
-    <meta name="google-site-verification" content="2ZAu0AzVD4zouytP19c8g_1SBi3K1SaWj769fs_Xsr4" />
-
-    <!-- Open Graph -->
     <meta property="og:title" content="Mystická Svatyně | Výklad Tarotu a Rituály">
     <meta property="og:description" content="Nahlédněte do tajemství přítomného okamžiku. Výklady tarotu a energetické rituály na míru.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://mysticka-svatyne.vercel.app">
 
+    <meta name="theme-color" content="#07040d">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --bg-color: #07040d;
@@ -42,15 +41,19 @@
             padding: 0;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             background-color: var(--bg-color);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 50% 0%, rgba(88, 28, 135, 0.25) 0%, transparent 70%),
                 radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 50%);
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh;
-            padding: 40px 20px 0 20px;
+            padding: 40px 20px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -74,6 +77,7 @@
             letter-spacing: 2px;
             background: linear-gradient(135deg, #fff 0%, #d4af37 50%, #aa8014 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
         }
@@ -90,7 +94,7 @@
             color: var(--accent-gold);
             font-size: 1.6rem;
             text-align: center;
-            margin: 40px 0 20px 0;
+            margin: 40px 0 20px;
             letter-spacing: 1px;
         }
 
@@ -100,7 +104,7 @@
             border: 1px solid var(--border-gold);
             border-radius: 16px;
             padding: 28px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
             transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
@@ -109,7 +113,6 @@
             box-shadow: 0 8px 30px var(--accent-glow);
         }
 
-        /* Tarot Section */
         .tarot-wrapper {
             text-align: center;
             perspective: 1000px;
@@ -192,7 +195,6 @@
             width: 100%;
         }
 
-        /* Services Grid */
         .services-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -227,7 +229,6 @@
             margin-bottom: 16px;
         }
 
-        /* Buttons & Inputs */
         button {
             background: linear-gradient(135deg, #d4af37 0%, #a38118 100%);
             color: #07040d;
@@ -259,6 +260,16 @@
             box-shadow: none;
         }
 
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        .close-btn:focus-visible {
+            outline: 2px solid var(--accent-gold);
+            outline-offset: 3px;
+        }
+
         label {
             display: block;
             font-size: 0.85rem;
@@ -278,7 +289,6 @@
             color: #fff;
             font-family: inherit;
             font-size: 0.95rem;
-            box-sizing: border-box;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
@@ -288,12 +298,15 @@
             box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
 
-        /* Modal Popup */
+        select option {
+            background: #130a24;
+            color: #fff;
+        }
+
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.85);
@@ -315,27 +328,38 @@
             overflow-y: auto;
             text-align: center;
             position: relative;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
         }
 
         .close-btn {
             position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 1.5rem;
+            top: 12px;
+            right: 18px;
+            font-size: 1.8rem;
+            line-height: 1;
             color: var(--text-muted);
             cursor: pointer;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            width: auto;
+            padding: 4px 8px;
         }
 
         .close-btn:hover {
             color: #fff;
+            box-shadow: none;
         }
 
         .qr-img {
-            max-width: 200px;
-            border: 2px solid var(--border-gold);
-            border-radius: 12px;
-            margin: 15px 0;
+            display: block;
+            width: 220px;
+            max-width: 100%;
+            height: auto;
+            background: #fff;
+            border: 8px solid #fff;
+            border-radius: 8px;
+            margin: 18px auto;
         }
 
         code {
@@ -344,9 +368,56 @@
             border-radius: 4px;
             color: var(--accent-gold);
             font-family: monospace;
+            overflow-wrap: anywhere;
         }
 
-        /* Footer styling */
+        .payment-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            line-height: 1.8;
+        }
+
+        .payment-instructions {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+
+        .payment-reference {
+            color: var(--accent-gold);
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .status-message {
+            display: none;
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .status-message.success {
+            display: block;
+            color: #b8f0c5;
+            background: rgba(40, 140, 70, 0.15);
+            border: 1px solid rgba(100, 210, 130, 0.35);
+        }
+
+        .status-message.error {
+            display: block;
+            color: #ffb8b8;
+            background: rgba(180, 40, 40, 0.15);
+            border: 1px solid rgba(230, 80, 80, 0.35);
+        }
+
         footer {
             width: 100%;
             margin-top: 60px;
@@ -378,7 +449,6 @@
             color: var(--accent-gold);
             text-decoration: none;
             cursor: pointer;
-            transition: color 0.2s;
         }
 
         .footer-links a:hover {
@@ -387,43 +457,92 @@
 
         .footer-disclaimer {
             font-size: 0.75rem;
-            line-height: 1.4;
+            line-height: 1.5;
             max-width: 700px;
             opacity: 0.7;
         }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 25px 14px 0;
+            }
+
+            h1 {
+                font-size: 1.9rem;
+            }
+
+            .subtitle {
+                font-size: 0.78rem;
+            }
+
+            .card-box {
+                padding: 20px;
+            }
+
+            .section-title {
+                font-size: 1.35rem;
+            }
+
+            .modal-content {
+                padding: 28px 18px 20px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
+
         <header>
             <h1>Mystická Svatyně</h1>
-            <p class="subtitle">Astro & Tarot Konzultace</p>
+            <p class="subtitle">Astro &amp; Tarot Konzultace</p>
         </header>
 
-        <!-- Tarot Section -->
-        <div class="card-box tarot-wrapper">
-            <h2 class="service-title" style="font-size: 1.4rem;">Osobní karta pro dnešní den</h2>
-            
-            <div class="tarot-card" id="tarot-card-box">
+        <!-- TAROT -->
+        <section class="card-box tarot-wrapper" aria-labelledby="tarot-heading">
+            <h2 id="tarot-heading" class="service-title" style="font-size: 1.4rem;">
+                Osobní karta pro dnešní den
+            </h2>
+
+            <div class="tarot-card" id="tarot-card-box" aria-live="polite">
                 <div id="card-tag-wrapper" style="display: none;">
                     <span id="card-element" class="card-tag">Element</span>
                 </div>
+
                 <div id="card-title" class="tarot-name">✨</div>
                 <div id="card-keywords" class="card-keywords" style="display: none;"></div>
+
                 <div class="gold-divider"></div>
-                <div id="card-desc" class="tarot-desc">Nahlédněte do tajemství přítomného okamžiku.</div>
-                
+
+                <div id="card-desc" class="tarot-desc">
+                    Nahlédněte do tajemství přítomného okamžiku.
+                </div>
+
                 <div id="card-reflection" class="reflection-box" style="display: none;">
                     <strong>Otázka k sebereflexi:</strong>
                     <p id="card-question" style="margin-top: 4px; font-style: italic;"></p>
                 </div>
             </div>
 
-            <button id="draw-btn" onclick="drawCard()" style="max-width: 250px;">Táhnout kartu</button>
-        </div>
+            <button id="draw-btn" type="button" onclick="drawCard()" style="max-width: 250px;">
+                Táhnout kartu
+            </button>
+        </section>
 
-        <!-- Services Section -->
+        <!-- SLUŽBY -->
         <h2 class="section-title">Nabídka Služeb</h2>
+
         <div class="services-grid">
             {% for key, service in services.items() %}
             <div class="card-box service-card">
@@ -431,270 +550,701 @@
                     <h3 class="service-title">{{ service.title }}</h3>
                     <p class="service-desc">{{ service.description }}</p>
                 </div>
+
                 <div>
-                    <div class="service-price">{{ "%.0f"|format(service.price) }} €</div>
-                    <button onclick="selectAndPay('{{ key }}')">Zaplatit přes QR kód</button>
+                    <div class="service-price">
+                        {{ "%.2f"|format(service.price) }} €
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="selectAndPay('{{ key }}')"
+                    >
+                        Zobrazit platební QR kód
+                    </button>
                 </div>
             </div>
             {% endfor %}
         </div>
 
-        <!-- Reservation Section -->
-        <h2 class="section-title" id="reservation-section-title">Rezervace Termínu</h2>
+        <!-- REZERVACE -->
+        <h2 class="section-title" id="reservation-section-title">
+            Rezervace Termínu
+        </h2>
+
         <div class="card-box">
             <form id="reservation-form">
                 <label for="res-email">Váš E-mail</label>
-                <input type="email" id="res-email" required placeholder="vás@email.cz">
+                <input
+                    type="email"
+                    id="res-email"
+                    name="email"
+                    required
+                    maxlength="254"
+                    autocomplete="email"
+                    placeholder="vas@email.cz"
+                >
 
                 <label for="res-service">Požadovaná služba</label>
-                <select id="res-service">
+                <select id="res-service" name="service" required>
                     {% for key, service in services.items() %}
-                    <option value="{{ key }}">{{ service.title }} ({{ "%.0f"|format(service.price) }} €)</option>
+                    <option value="{{ key }}">
+                        {{ service.title }} ({{ "%.2f"|format(service.price) }} €)
+                    </option>
                     {% endfor %}
                 </select>
 
                 <label for="res-note">Poznámka / Záměr</label>
-                <textarea id="res-note" rows="4" placeholder="Napište krátce o vašem záměru nebo konkrétní otázce..."></textarea>
+                <textarea
+                    id="res-note"
+                    name="note"
+                    rows="4"
+                    maxlength="3000"
+                    placeholder="Napište krátce o vašem záměru nebo konkrétní otázce..."
+                ></textarea>
 
-                <button type="submit" id="res-submit-btn">Odeslat rezervaci</button>
+                <div id="reservation-payment-status" class="payment-instructions">
+                    Nejprve si vyberte službu a zobrazte její QR kód.
+                    Platební reference z QR kódu bude připojena k objednávce.
+                </div>
+
+                <div id="reservation-message" class="status-message" role="status" aria-live="polite"></div>
+
+                <button type="submit" id="res-submit-btn">
+                    Odeslat rezervaci
+                </button>
             </form>
         </div>
     </div>
 
-    <!-- Modal window for QR Code -->
-    <div id="qr-modal" class="modal">
+    <!-- QR MODAL -->
+    <div
+        id="qr-modal"
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        aria-hidden="true"
+    >
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('qr-modal')">&times;</span>
+            <button
+                type="button"
+                class="close-btn"
+                aria-label="Zavřít"
+                onclick="closeModal('qr-modal')"
+            >&times;</button>
+
             <h2 id="modal-title" class="service-title"></h2>
             <p id="modal-price" class="service-price" style="margin-top: 5px;"></p>
+
             <div id="modal-qr-container"></div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 10px; text-align: left; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
+
+            <div class="payment-info">
                 <p><strong>IBAN:</strong> <code id="modal-iban"></code></p>
-                <p style="margin-top: 4px;"><strong>BIC / SWIFT:</strong> <code id="modal-bic"></code></p>
-                <p style="margin-top: 4px;"><strong>Variabilní symbol:</strong> <code id="modal-vs"></code></p>
+                <p><strong>BIC / SWIFT:</strong> <code id="modal-bic"></code></p>
+                <p>
+                    <strong>Platební reference:</strong>
+                    <code id="modal-vs" class="payment-reference"></code>
+                </p>
             </div>
+
+            <p class="payment-instructions">
+                Naskenujte QR kód ve své bankovní aplikaci.
+                Před odesláním platby zkontrolujte částku a příjemce.
+                Po zaplacení odešlete rezervační formulář.
+            </p>
+
+            <p class="payment-instructions">
+                Platby kontrolujeme ručně. Objednávka není potvrzená
+                jako zaplacená, dokud platbu neověříme.
+            </p>
         </div>
     </div>
 
-    <!-- Modal window for Terms & GDPR -->
-    <div id="terms-modal" class="modal">
+    <!-- OBCHODNÍ PODMÍNKY A OCHRANA ÚDAJŮ -->
+    <div
+        id="terms-modal"
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="terms-title"
+        aria-hidden="true"
+    >
         <div class="modal-content" style="text-align: left;">
-            <span class="close-btn" onclick="closeModal('terms-modal')">&times;</span>
-            <h2 class="service-title" style="text-align: center; margin-bottom: 15px;">Obchodní podmínky & GDPR</h2>
+            <button
+                type="button"
+                class="close-btn"
+                aria-label="Zavřít"
+                onclick="closeModal('terms-modal')"
+            >&times;</button>
+
+            <h2
+                id="terms-title"
+                class="service-title"
+                style="text-align: center; margin-bottom: 15px;"
+            >
+                Obchodní podmínky &amp; GDPR
+            </h2>
+
             <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
-                <h3 style="color: var(--accent-gold); margin: 10px 0 5px 0;">1. Poskytovatel služeb</h3>
-                <p>Služby Astro & Tarot konzultací poskytuje provozovatel projektu Mystická Svatyně. Kontakt: info@mysticka-svatyne.vercel.app</p>
-                
-                <h3 style="color: var(--accent-gold); margin: 15px 0 5px 0;">2. Povaha služeb</h3>
-                <p>Veškeré výklady tarotu, horoskopy a energetické konzultace slouží výhradně pro účely osobního rozvoje, sebereflexe a zábavy. Nenahrazují odbornou lékařskou, psychologickou, právní ani finanční péči.</p>
-                
-                <h3 style="color: var(--accent-gold); margin: 15px 0 5px 0;">3. Platby a rezervace</h3>
-                <p>Služby jsou poskytovány na základě předchozí úhrady bankovním převodem (pomocí QR kódu nebo přímého převodu). Termín plnění je sjednán individuálně po připsání platby.</p>
-                
-                <h3 style="color: var(--accent-gold); margin: 15px 0 5px 0;">4. Ochrana osobních údajů (GDPR)</h3>
-                <p>Osobní údaje (e-mail, poznámky k rezervaci) jsou zpracovávány výhradně za účelem vyřízení vaší objednávky a nejsou předávány třetím stranám.</p>
+                <h3 style="color: var(--accent-gold); margin: 10px 0 5px;">
+                    1. Poskytovatel služeb
+                </h3>
+                <p>
+                    Služby Astro &amp; Tarot konzultací poskytuje provozovatel
+                    projektu Mystická Svatyně.
+                    Kontaktní e-mail musí být doplněn skutečnou funkční adresou
+                    provozovatele.
+                </p>
+
+                <h3 style="color: var(--accent-gold); margin: 15px 0 5px;">
+                    2. Povaha služeb
+                </h3>
+                <p>
+                    Výklady tarotu, horoskopy a konzultace slouží pro osobní
+                    rozvoj, sebereflexi a zábavu. Nenahrazují odbornou
+                    lékařskou, psychologickou, právní ani finanční péči.
+                </p>
+
+                <h3 style="color: var(--accent-gold); margin: 15px 0 5px;">
+                    3. Platby a rezervace
+                </h3>
+                <p>
+                    Služby jsou hrazeny bankovním převodem pomocí QR kódu
+                    nebo přímého převodu. Platby jsou kontrolovány ručně.
+                    Termín a poskytnutí služby se sjednávají individuálně.
+                    Odeslání formuláře samo o sobě nepotvrzuje přijetí platby.
+                </p>
+
+                <h3 style="color: var(--accent-gold); margin: 15px 0 5px;">
+                    4. Ochrana osobních údajů
+                </h3>
+                <p>
+                    Údaje zadané do rezervačního formuláře, zejména e-mail
+                    a poznámka, jsou použity pro vyřízení objednávky
+                    a komunikaci se zákazníkem.
+                </p>
+                <p style="margin-top: 8px;">
+                    Pro odesílání objednávek je využívána externí e-mailová
+                    služba Resend. Údaje proto mohou být zpracovávány
+                    poskytovatelem této služby za účelem doručení e-mailu.
+                </p>
+                <p style="margin-top: 8px;">
+                    Před zveřejněním je nutné doplnit úplné informace
+                    o provozovateli, právním základu zpracování, době
+                    uchování údajů, právech zákazníků a případných dalších
+                    příjemcích údajů.
+                </p>
+
+                <h3 style="color: var(--accent-gold); margin: 15px 0 5px;">
+                    5. Kontakt a identifikace provozovatele
+                </h3>
+                <p>
+                    Před ostrým provozem doplňte skutečné jméno nebo název
+                    provozovatele, adresu, registrační údaje, pokud se
+                    na vás vztahují, a funkční kontaktní e-mail.
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
+    <!-- PATIČKA -->
     <footer>
         <div class="footer-content">
             <div class="footer-links">
-                <a onclick="openModal('terms-modal')">Obchodní podmínky & GDPR</a>
+                <a href="#" onclick="openModal('terms-modal'); return false;">
+                    Obchodní podmínky &amp; GDPR
+                </a>
                 <span>•</span>
-                <a href="mailto:info@mysticka-svatyne.vercel.app">Kontakt: info@mysticka-svatyne.vercel.app</a>
+                <a href="mailto:info@mysticka-svatyne.vercel.app">
+                    Kontakt: info@mysticka-svatyne.vercel.app
+                </a>
             </div>
+
             <p class="footer-disclaimer">
-                Upozornění: Astro a Tarot konzultace slouží pro osobní rozvoj a sebereflexi. Nenahrazují odborné lékařské, právní ani finanční poradenství.
+                Upozornění: Astro a Tarot konzultace slouží pro osobní rozvoj
+                a sebereflexi. Nenahrazují odborné lékařské, právní ani
+                finanční poradenství.
             </p>
+
             <p>© 2026 Mystická Svatyně. Všechna práva vyhrazena.</p>
         </div>
     </footer>
 
     <script>
-        const TODAY_KEY = 'tarot_card_' + new Date().toISOString().slice(0, 10);
+        // =====================================================
+        // STAV A POMOCNÉ FUNKCE
+        // =====================================================
 
-        // Při načtení stránky zkontrolujeme, zda už dnes karta nebyla vytáhnutá
+        let currentPaymentReference = null;
+        let currentQrServiceId = null;
+        let lastFocusedElement = null;
+
+        // Datum podle místního času návštěvníka, nikoli UTC.
+        function getLocalDateKey() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
+        const TODAY_KEY = 'tarot_card_' + getLocalDateKey();
+
+        function showReservationMessage(message, type) {
+            const box = document.getElementById('reservation-message');
+
+            if (!box) return;
+
+            box.textContent = message;
+            box.className = 'status-message ' + type;
+        }
+
+        function clearReservationMessage() {
+            const box = document.getElementById('reservation-message');
+
+            if (!box) return;
+
+            box.textContent = '';
+            box.className = 'status-message';
+        }
+
+        function updatePaymentStatus(message) {
+            const box = document.getElementById('reservation-payment-status');
+
+            if (box) {
+                box.textContent = message;
+            }
+        }
+
+        // =====================================================
+        // TAROT – NAČTENÍ ULOŽENÉ KARTY
+        // =====================================================
+
         window.addEventListener('DOMContentLoaded', () => {
             const savedCard = localStorage.getItem(TODAY_KEY);
+
             if (savedCard) {
                 try {
                     displayCard(JSON.parse(savedCard));
                     lockDrawButton();
-                } catch (e) {
+                } catch (error) {
                     localStorage.removeItem(TODAY_KEY);
                 }
             }
         });
 
+        // =====================================================
+        // TAROT – VYTAŽENÍ KARTY
+        // =====================================================
+
         async function drawCard() {
             const cardBox = document.getElementById('tarot-card-box');
             const titleEl = document.getElementById('card-title');
             const descEl = document.getElementById('card-desc');
+            const button = document.getElementById('draw-btn');
 
-            if (!cardBox || !titleEl || !descEl) return;
+            if (!cardBox || !titleEl || !descEl || !button) return;
+            if (button.disabled) return;
 
-            // Spuštění flip animace
+            button.disabled = true;
+
             cardBox.classList.remove('flip');
-            void cardBox.offsetWidth; // Trigger reflow pro reset animace
+            void cardBox.offsetWidth;
             cardBox.classList.add('flip');
 
-            titleEl.innerText = "Míchám karty...";
-            descEl.innerText = "";
+            titleEl.textContent = 'Míchám karty...';
+            descEl.textContent = '';
+
             document.getElementById('card-tag-wrapper').style.display = 'none';
             document.getElementById('card-keywords').style.display = 'none';
             document.getElementById('card-reflection').style.display = 'none';
 
             try {
-                const res = await fetch('/api/draw-card');
-                const data = await res.json();
-                
-                setTimeout(() => {
+                const response = await fetch('/api/draw-card');
+
+                if (!response.ok) {
+                    throw new Error('Nepodařilo se načíst kartu.');
+                }
+
+                const data = await response.json();
+
+                if (!data || !data.name || !data.meaning) {
+                    throw new Error('Server vrátil neplatná data.');
+                }
+
+                window.setTimeout(() => {
                     localStorage.setItem(TODAY_KEY, JSON.stringify(data));
                     displayCard(data);
                     lockDrawButton();
                 }, 250);
-            } catch (err) {
-                titleEl.innerText = "Chyba";
-                descEl.innerText = "Nepodařilo se načíst kartu.";
+
+            } catch (error) {
+                titleEl.textContent = 'Chyba';
+                descEl.textContent = 'Nepodařilo se načíst kartu. Zkuste to prosím znovu.';
+                button.disabled = false;
+                button.textContent = 'Zkusit znovu';
             }
         }
 
         function displayCard(data) {
+            if (!data || typeof data !== 'object') return;
+
             const cardBox = document.getElementById('tarot-card-box');
-            const titleEl = document.getElementById('card-title');
-            const descEl = document.getElementById('card-desc');
-            
-            titleEl.innerText = data.name || "Karta stažena";
-            descEl.innerText = data.meaning || "";
+
+            document.getElementById('card-title').textContent =
+                data.name || 'Karta stažena';
+
+            document.getElementById('card-desc').textContent =
+                data.meaning || '';
+
+            const tagWrapper = document.getElementById('card-tag-wrapper');
+            const keywords = document.getElementById('card-keywords');
+            const reflection = document.getElementById('card-reflection');
 
             if (data.element) {
-                document.getElementById('card-element').innerText = data.element;
-                document.getElementById('card-tag-wrapper').style.display = 'block';
+                document.getElementById('card-element').textContent = data.element;
+                tagWrapper.style.display = 'block';
+            } else {
+                tagWrapper.style.display = 'none';
             }
 
             if (data.keywords) {
-                document.getElementById('card-keywords').innerText = data.keywords;
-                document.getElementById('card-keywords').style.display = 'block';
+                keywords.textContent = data.keywords;
+                keywords.style.display = 'block';
+            } else {
+                keywords.style.display = 'none';
             }
 
             if (data.question) {
-                document.getElementById('card-question').innerText = data.question;
-                document.getElementById('card-reflection').style.display = 'block';
+                document.getElementById('card-question').textContent = data.question;
+                reflection.style.display = 'block';
+            } else {
+                reflection.style.display = 'none';
             }
 
-            if (data.is_reversed) {
-                cardBox.style.borderColor = '#e63946';
-            } else {
-                cardBox.style.borderColor = 'var(--border-gold)';
-            }
+            cardBox.style.borderColor = data.is_reversed
+                ? '#e63946'
+                : 'var(--border-gold)';
         }
 
         function lockDrawButton() {
-            const btn = document.getElementById('draw-btn');
-            if (btn) {
-                btn.innerText = "Karta pro dnešní den načtena";
-                btn.disabled = true;
+            const button = document.getElementById('draw-btn');
+
+            if (button) {
+                button.textContent = 'Karta pro dnešní den načtena';
+                button.disabled = true;
             }
         }
+
+        // =====================================================
+        // PLATEBNÍ QR KÓD
+        // =====================================================
 
         async function generateQR(serviceId) {
-            try {
-                const res = await fetch('/api/generate-qr', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ service_id: serviceId })
-                });
-                const data = await res.json();
+            const modal = document.getElementById('qr-modal');
 
-                document.getElementById('modal-title').innerText = data.title || "";
-                document.getElementById('modal-price').innerText = data.price || "";
-                document.getElementById('modal-qr-container').innerHTML = `<img src="${data.qr_image}" class="qr-img" alt="QR kód">`;
-                document.getElementById('modal-iban').innerText = data.iban || "";
-                document.getElementById('modal-bic').innerText = data.bic || "";
-                document.getElementById('modal-vs').innerText = data.vs || "";
+            try {
+                const response = await fetch('/api/generate-qr', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        service_id: serviceId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.status !== 'success') {
+                    throw new Error(
+                        data.message || 'QR kód se nepodařilo vytvořit.'
+                    );
+                }
+
+                if (
+                    !data.qr_image ||
+                    !data.qr_image.startsWith('data:image/png;base64,')
+                ) {
+                    throw new Error('Server vrátil neplatný QR obrázek.');
+                }
+
+                if (!data.payment_reference) {
+                    throw new Error('V odpovědi chybí platební reference.');
+                }
+
+                if (data.service_id !== serviceId) {
+                    throw new Error('QR kód neodpovídá vybrané službě.');
+                }
+
+                // Uložíme referenci, která se musí poslat při rezervaci.
+                currentPaymentReference = data.payment_reference;
+                currentQrServiceId = serviceId;
+
+                document.getElementById('modal-title').textContent =
+                    data.title || '';
+
+                document.getElementById('modal-price').textContent =
+                    data.price || '';
+
+                document.getElementById('modal-iban').textContent =
+                    data.iban || '';
+
+                document.getElementById('modal-bic').textContent =
+                    data.bic || '';
+
+                document.getElementById('modal-vs').textContent =
+                    data.payment_reference;
+
+                // QR obrázek vkládáme bezpečně přes DOM API.
+                const container = document.getElementById('modal-qr-container');
+                const image = document.createElement('img');
+
+                image.src = data.qr_image;
+                image.alt = 'SEPA platební QR kód';
+                image.className = 'qr-img';
+                image.width = 220;
+                image.height = 220;
+
+                container.replaceChildren(image);
+
+                updatePaymentStatus(
+                    'QR kód je připraven. Po zaplacení odešlete rezervaci. ' +
+                    'Reference: ' + data.payment_reference
+                );
+
+                clearReservationMessage();
 
                 openModal('qr-modal');
-            } catch (err) {
-                alert("Chyba při generování QR kódu.");
+
+                return true;
+
+            } catch (error) {
+                currentPaymentReference = null;
+                currentQrServiceId = null;
+
+                showReservationMessage(
+                    error.message || 'Chyba při generování QR kódu.',
+                    'error'
+                );
+
+                return false;
             }
         }
 
-        function selectAndPay(serviceId) {
+        // =====================================================
+        // VÝBĚR SLUŽBY A PLATBA
+        // =====================================================
+
+        async function selectAndPay(serviceId) {
             const serviceSelect = document.getElementById('res-service');
+
             if (serviceSelect) {
                 serviceSelect.value = serviceId;
             }
 
-            const targetSection = document.getElementById('reservation-section-title');
+            // Při výběru nové služby zneplatníme starou referenci.
+            currentPaymentReference = null;
+            currentQrServiceId = null;
+
+            clearReservationMessage();
+
+            const targetSection = document.getElementById(
+                'reservation-section-title'
+            );
+
             if (targetSection) {
-                targetSection.scrollIntoView({ behavior: 'smooth' });
+                targetSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
             }
 
-            generateQR(serviceId);
+            await generateQR(serviceId);
         }
 
+        // Pokud zákazník ručně změní službu, starý QR kód už neplatí
+        // pro nově vybranou službu.
+        document.getElementById('res-service').addEventListener('change', () => {
+            currentPaymentReference = null;
+            currentQrServiceId = null;
+
+            updatePaymentStatus(
+                'Změnili jste službu. V nabídce služeb znovu otevřete ' +
+                'platební QR kód pro nově vybranou službu.'
+            );
+
+            clearReservationMessage();
+        });
+
+        // =====================================================
+        // MODÁLNÍ OKNA
+        // =====================================================
+
         function openModal(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.style.display = 'flex';
+            const element = document.getElementById(id);
+
+            if (!element) return;
+
+            lastFocusedElement = document.activeElement;
+
+            element.style.display = 'flex';
+            element.setAttribute('aria-hidden', 'false');
+
+            const closeButton = element.querySelector('.close-btn');
+
+            if (closeButton) {
+                closeButton.focus();
             }
         }
 
         function closeModal(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.style.display = 'none';
+            const element = document.getElementById(id);
+
+            if (!element) return;
+
+            element.style.display = 'none';
+            element.setAttribute('aria-hidden', 'true');
+
+            if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+                lastFocusedElement.focus();
             }
         }
 
-        window.onclick = function(event) {
-            if (event.target.classList && event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        }
-
-        const resForm = document.getElementById('reservation-form');
-        if (resForm) {
-            resForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const email = document.getElementById('res-email').value;
-                const service = document.getElementById('res-service').value;
-                const note = document.getElementById('res-note').value;
-                const btn = document.getElementById('res-submit-btn');
-
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerText = "Odesílám rezervaci...";
-                }
-
-                try {
-                    const response = await fetch('/api/reserve', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ email: email, service: service, note: note })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok && data.status === 'success') {
-                        alert(data.message);
-                        resForm.reset();
-                    } else {
-                        alert("Chyba: " + (data.message || "Nepodařilo se odeslat."));
-                    }
-                } catch (err) {
-                    alert("Chyba při spojení se serverem.");
-                } finally {
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerText = "Odeslat rezervaci";
-                    }
+        // Zavření kliknutím mimo obsah modálního okna.
+        document.querySelectorAll('.modal').forEach((modal) => {
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal(modal.id);
                 }
             });
-        }
+        });
+
+        // Zavření klávesou Escape.
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach((modal) => {
+                    if (modal.style.display === 'flex') {
+                        closeModal(modal.id);
+                    }
+                });
+            }
+        });
+
+        // =====================================================
+        // ODESLÁNÍ REZERVACE
+        // =====================================================
+
+        const reservationForm = document.getElementById('reservation-form');
+
+        reservationForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const emailInput = document.getElementById('res-email');
+            const serviceSelect = document.getElementById('res-service');
+            const noteInput = document.getElementById('res-note');
+            const submitButton = document.getElementById('res-submit-btn');
+
+            const email = emailInput.value.trim();
+            const service = serviceSelect.value;
+            const note = noteInput.value.trim();
+
+            clearReservationMessage();
+
+            if (!emailInput.checkValidity()) {
+                emailInput.reportValidity();
+                return;
+            }
+
+            if (!service) {
+                showReservationMessage(
+                    'Vyberte prosím požadovanou službu.',
+                    'error'
+                );
+                return;
+            }
+
+            if (note.length > 3000) {
+                showReservationMessage(
+                    'Poznámka je příliš dlouhá.',
+                    'error'
+                );
+                return;
+            }
+
+            // Reference musí patřit právě vybrané službě.
+            if (
+                !currentPaymentReference ||
+                currentQrServiceId !== service
+            ) {
+                showReservationMessage(
+                    'Nejprve otevřete QR kód pro vybranou službu. ' +
+                    'Potom můžete odeslat rezervaci.',
+                    'error'
+                );
+
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Odesílám rezervaci...';
+
+            try {
+                const response = await fetch('/api/reserve', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        service: service,
+                        note: note,
+                        payment_reference: currentPaymentReference
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.status !== 'success') {
+                    throw new Error(
+                        data.message || 'Nepodařilo se odeslat rezervaci.'
+                    );
+                }
+
+                const reference = data.reference_number || currentPaymentReference;
+
+                showReservationMessage(
+                    (data.message || 'Objednávka byla odeslána.') +
+                    ' Číslo objednávky: ' + reference,
+                    'success'
+                );
+
+                updatePaymentStatus(
+                    'Objednávka byla odeslána. Čeká na ruční ověření platby.'
+                );
+
+                // Vyčistíme kontaktní údaje, ale ponecháme zobrazenou
+                // informaci o výsledku rezervace.
+                emailInput.value = '';
+                noteInput.value = '';
+
+                // Reference se nesmí omylem použít pro další objednávku.
+                currentPaymentReference = null;
+                currentQrServiceId = null;
+
+            } catch (error) {
+                showReservationMessage(
+                    error.message || 'Chyba při spojení se serverem.',
+                    'error'
+                );
+
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Odeslat rezervaci';
+            }
+        });
     </script>
 </body>
 </html>
