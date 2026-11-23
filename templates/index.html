@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#090711">
     <meta name="description" content="Mystická Svatyně – Tarot, Astrologie und persönliche Beratung.">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Mystická Svatyně">
+    <meta property="og:title" content="Mystická Svatyně | Tarot & Astrologie">
+    <meta property="og:description" content="Ein Ort für Tarot, Astrologie, Symbolik und achtsame Selbstreflexion.">
+    <meta name="twitter:card" content="summary">
     <title>Mystická Svatyně | Tarot & Astrologie</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -577,6 +583,14 @@
         .library-symbol { color:var(--gold);font:34px var(--serif); }
         .library-card h3 { margin:16px 0 9px;color:var(--gold-light);font:500 19px var(--serif); }
         .library-card p { color:var(--muted);font-size:12px;line-height:1.8; }
+        .faq-list { max-width:860px;margin:0 auto;display:grid;gap:12px; }
+        .faq-item { border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,rgba(36,26,54,.72),rgba(15,12,25,.82));overflow:hidden; }
+        .faq-item summary { position:relative;list-style:none;cursor:pointer;padding:20px 58px 20px 22px;color:var(--gold-light);font:500 16px/1.5 var(--serif); }
+        .faq-item summary::-webkit-details-marker { display:none; }
+        .faq-item summary::after { content:"＋";position:absolute;right:22px;top:50%;transform:translateY(-50%);color:var(--gold);font:22px var(--sans); }
+        .faq-item[open] summary::after { content:"−"; }
+        .faq-item p { padding:0 22px 22px;color:var(--muted);font-size:14px;line-height:1.85;max-width:760px; }
+        .faq-item summary:focus-visible { outline:2px solid var(--gold-light);outline-offset:-3px; }
         .skip-link { position:absolute;left:12px;top:-60px;z-index:100;padding:10px 14px;background:var(--gold-light);color:#17111a; }
         .skip-link:focus { top:12px; }
         @media(max-width:800px) { .library-grid { grid-template-columns:1fr; } .hero { min-height:590px; } }
@@ -611,6 +625,7 @@
                 <a href="#sluzby" data-i18n="navServices">Angebote</a>
                 <a href="#pristup" data-i18n="navApproach">Unser Ansatz</a>
                 <a href="#knihovna" data-i18n="navLibrary">Knihovna</a>
+                <a href="#faq" data-i18n="navFaq">FAQ</a>
                 <a href="#rezervace" data-i18n="navBook">Beratung buchen</a>
             </nav>
         </div>
@@ -750,6 +765,35 @@
         </div>
     </section>
 
+    <section class="section" id="faq">
+        <div class="shell">
+            <div class="section-heading">
+                <div class="eyebrow" data-i18n="faqLabel">Gut zu wissen</div>
+                <h2 data-i18n="faqTitle">Fragen an die Svatyně</h2>
+                <div class="ornament">✧</div>
+                <p data-i18n="faqIntro">Ein paar klare Antworten, bevor Sie Ihren ersten Schritt machen.</p>
+            </div>
+            <div class="faq-list">
+                <details class="faq-item">
+                    <summary data-i18n="faqQ1">Sagt mir Tarot sicher voraus, was passieren wird?</summary>
+                    <p data-i18n="faqA1">Nein. Tarot wird hier als symbolischer Impuls zur Reflexion verstanden, nicht als garantierte Vorhersage oder Ersatz für professionelle Beratung.</p>
+                </details>
+                <details class="faq-item">
+                    <summary data-i18n="faqQ2">Wie funktioniert eine Anfrage?</summary>
+                    <p data-i18n="faqA2">Wählen Sie ein Angebot, geben Sie Ihre E-Mail-Adresse ein und senden Sie Ihre Anfrage. Die weitere Abstimmung erfolgt persönlich per E-Mail.</p>
+                </details>
+                <details class="faq-item">
+                    <summary data-i18n="faqQ3">Wann gilt eine Zahlung als bestätigt?</summary>
+                    <p data-i18n="faqA3">Der QR-Code bereitet eine SEPA-Überweisung vor. Eine Anfrage oder ein angezeigter QR-Code bestätigt keine Zahlung. Der Zahlungseingang wird manuell geprüft.</p>
+                </details>
+                <details class="faq-item">
+                    <summary data-i18n="faqQ4">Muss ich ein Kundenkonto anlegen?</summary>
+                    <p data-i18n="faqA4">Nein. Für eine Anfrage ist kein Kundenkonto und kein Passwort erforderlich. Ihre Angaben werden zur Bearbeitung der Anfrage per E-Mail übermittelt.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
     <section class="section" id="rezervace">
         <div class="shell">
             <div class="section-heading">
@@ -844,7 +888,7 @@
 
         <div class="footer-links">
             <a href="#terms-modal" id="open-terms" data-i18n="terms">Terms & Privacy</a>
-            <a href="mailto:ruzar7789@gmail.com" data-i18n="contact">Contact</a>
+            <a href="#rezervace" data-i18n="contact">Contact form</a>
             <a href="#top" data-i18n="backTop">Back to top ↑</a>
         </div>
 
@@ -866,6 +910,19 @@
 
 const LANGUAGE_TEXTS = {
     de: {
+        navFaq:"Fragen",
+        faqLabel:"Gut zu wissen",
+        faqTitle:"Fragen an die Svatyně",
+        faqIntro:"Ein paar klare Antworten, bevor Sie Ihren ersten Schritt machen.",
+        faqQ1:"Sagt mir Tarot sicher voraus, was passieren wird?",
+        faqA1:"Nein. Tarot wird hier als symbolischer Impuls zur Reflexion verstanden, nicht als garantierte Vorhersage oder Ersatz für professionelle Beratung.",
+        faqQ2:"Wie funktioniert eine Anfrage?",
+        faqA2:"Wählen Sie ein Angebot, geben Sie Ihre E-Mail-Adresse ein und senden Sie Ihre Anfrage. Die weitere Abstimmung erfolgt persönlich per E-Mail.",
+        faqQ3:"Wann gilt eine Zahlung als bestätigt?",
+        faqA3:"Der QR-Code bereitet eine SEPA-Überweisung vor. Eine Anfrage oder ein angezeigter QR-Code bestätigt keine Zahlung. Der Zahlungseingang wird manuell geprüft.",
+        faqQ4:"Muss ich ein Kundenkonto anlegen?",
+        faqA4:"Nein. Für eine Anfrage ist kein Kundenkonto und kein Passwort erforderlich. Ihre Angaben werden zur Bearbeitung der Anfrage per E-Mail übermittelt.",
+        contact:"Kontaktformular",
         title:"Mystická Svatyně | Tarot, Astrologie & Beratung",
         description:"Mystická Svatyně – Tarot, Astrologie und persönliche Beratung.",
         navTarot:"Tageskarte",
@@ -951,6 +1008,19 @@ const LANGUAGE_TEXTS = {
     },
 
     cs: {
+        navFaq:"Otázky",
+        faqLabel:"Co je dobré vědět",
+        faqTitle:"Časté otázky",
+        faqIntro:"Několik jasných odpovědí, než uděláte první krok.",
+        faqQ1:"Předpoví tarot jistě, co se stane?",
+        faqA1:"Ne. Tarot zde chápeme jako symbolický podnět k zamyšlení, nikoli jako zaručenou předpověď nebo náhradu odborné rady.",
+        faqQ2:"Jak funguje odeslání poptávky?",
+        faqA2:"Vyberte službu, zadejte svůj e-mail a odešlete poptávku. Další domluva probíhá osobně prostřednictvím e-mailu.",
+        faqQ3:"Kdy je platba považována za potvrzenou?",
+        faqA3:"QR kód pouze připraví SEPA bankovní převod. Odeslání poptávky ani zobrazení QR kódu nepotvrzuje platbu. Připsání peněz ověřujeme ručně.",
+        faqQ4:"Musím si vytvořit zákaznický účet?",
+        faqA4:"Ne. Pro odeslání poptávky nepotřebujete účet ani heslo. Vaše údaje jsou předány e-mailem za účelem vyřízení poptávky.",
+        contact:"Kontaktní formulář",
         title:"Mystická Svatyně | Tarot, astrologie a konzultace",
         description:"Mystická Svatyně – osobní výklady tarotu, astrologie a individuální konzultace.",
         navTarot:"Denní tarot",
@@ -1036,6 +1106,19 @@ const LANGUAGE_TEXTS = {
     },
 
     en: {
+        navFaq:"FAQ",
+        faqLabel:"Good to know",
+        faqTitle:"Questions for the Sanctuary",
+        faqIntro:"A few clear answers before you take your first step.",
+        faqQ1:"Does tarot reliably predict what will happen?",
+        faqA1:"No. Tarot is presented here as a symbolic prompt for reflection, not a guaranteed prediction or a substitute for professional advice.",
+        faqQ2:"How does an enquiry work?",
+        faqA2:"Choose a service, enter your email address and submit your enquiry. We will coordinate the next steps with you personally by email.",
+        faqQ3:"When is a payment considered confirmed?",
+        faqA3:"The QR code prepares a SEPA bank transfer. Submitting an enquiry or displaying a QR code does not confirm payment. Incoming payments are checked manually.",
+        faqQ4:"Do I need to create a customer account?",
+        faqA4:"No. You do not need an account or password to make an enquiry. Your details are sent by email so the enquiry can be handled.",
+        contact:"Contact form",
         title:"Mystická Svatyně | Tarot, Astrology & Consultations",
         description:"Mystická Svatyně – personal tarot readings, astrology services and individual consultations.",
         navTarot:"Daily tarot",
@@ -1227,6 +1310,7 @@ function updatePaymentStatus(message) {
    ========================================================= */
 
 function setLanguage(language) {
+    document.documentElement.lang = language;
     if (!LANGUAGE_TEXTS[language]) {
         language = "de";
     }
