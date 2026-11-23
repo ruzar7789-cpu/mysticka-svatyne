@@ -1013,7 +1013,7 @@ def reserve():
             "status": "success",
             "reference": "RECEIVED",
             "payment_status": "pending_manual_confirmation",
-            "message": MESSAGES[language]["reservation_sent"]
+            "message": "Request received."
         }), 200
 
     if fulfillment not in {"email", "appointment"}:
