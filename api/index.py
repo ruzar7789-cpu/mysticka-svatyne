@@ -847,8 +847,10 @@ def draw_card():
 
 @app.route("/api/generate-qr", methods=["POST"])
 def generate_qr():
-    language = get_language(request.args.get("lang", "de"))
     data = _json_body()
+    language = get_language(
+        (data or {}).get("lang", request.args.get("lang", "de"))
+    )
 
     if data is None:
         return jsonify({
@@ -936,8 +938,10 @@ def generate_qr():
 
 @app.route("/api/reserve", methods=["POST"])
 def reserve():
-    language = get_language(request.args.get("lang", "de"))
     data = _json_body()
+    language = get_language(
+        (data or {}).get("lang", request.args.get("lang", "de"))
+    )
 
     if data is None:
         return jsonify({
