@@ -20,30 +20,20 @@ app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
 # KONFIGURACE PLATEB A E-MAILU
 # ---------------------------------------------------------
 
-REVOLUT_IBAN = os.getenv(
-    "REVOLUT_IBAN",
-    "LT803250069633761109"
-).replace(" ", "").upper()
+# Bankovní údaje se načítají výhradně z chráněných proměnných prostředí.
+# Nikdy je nevkládejte přímo do zdrojového kódu ani repozitáře.
+REVOLUT_IBAN = os.getenv("REVOLUT_IBAN", "").replace(" ", "").upper()
 
-REVOLUT_BIC = os.getenv(
-    "REVOLUT_BIC",
-    "REVOLT21"
-).replace(" ", "").upper()
+REVOLUT_BIC = os.getenv("REVOLUT_BIC", "").replace(" ", "").upper()
 
 BENEFICIARY_NAME = os.getenv(
     "PAYMENT_BENEFICIARY_NAME",
     "Mystická Svatyně"
 )
 
-ADMIN_EMAIL = os.getenv(
-    "ADMIN_EMAIL",
-    "ruzar7789@gmail.com"
-).strip()
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "").strip()
 
-RESEND_FROM = os.getenv(
-    "RESEND_FROM",
-    "Mystická Svatyně <onboarding@resend.dev>"
-).strip()
+RESEND_FROM = os.getenv("RESEND_FROM", "").strip()
 
 resend.api_key = os.getenv("RESEND_API_KEY", "")
 
@@ -78,6 +68,7 @@ MESSAGES = {
         "reservation_error": "Die Anfrage konnte momentan nicht gesendet werden. Bitte versuchen Sie es später erneut.",
         "send_error": "Das Senden der Anfrage ist fehlgeschlagen. Bitte versuchen Sie es später erneut.",
         "payment_notice": "Die Zahlung wird erst nach manueller Prüfung des Zahlungseingangs bestätigt.",
+        "payment_not_configured": "Die Bankverbindung ist noch nicht eingerichtet. Bitte versuchen Sie es später erneut.",
         "too_large": "Die Anfrage ist zu groß.",
         "reservation_success": "Ihre Anfrage wurde angenommen. Die Zahlung ist noch nicht bestätigt. Wir prüfen den Zahlungseingang manuell. Der Termin wird individuell vereinbart.",
         "reversed": " (Umgekehrt)"
@@ -89,6 +80,7 @@ MESSAGES = {
         "reservation_error": "Rezervaci nyní nelze odeslat. Zkuste to prosím později.",
         "send_error": "Odeslání rezervace se nezdařilo. Zkuste to prosím později.",
         "payment_notice": "Platba bude potvrzena až po ruční kontrole připsání peněz.",
+        "payment_not_configured": "Platební údaje zatím nejsou nastaveny. Zkuste to prosím později.",
         "too_large": "Požadavek je příliš velký.",
         "reservation_success": "Vaše poptávka byla přijata. Platba zatím není potvrzena. Připsání peněz ověříme ručně. Termín bude domluven individuálně.",
         "reversed": " (Obrácená)"
@@ -100,6 +92,7 @@ MESSAGES = {
         "reservation_error": "Your request cannot be sent right now. Please try again later.",
         "send_error": "The request could not be sent. Please try again later.",
         "payment_notice": "Payment will only be confirmed after we manually verify that the money has arrived.",
+        "payment_not_configured": "Payment details have not been configured yet. Please try again later.",
         "too_large": "The request is too large.",
         "reservation_success": "Your request has been received. Payment has not yet been confirmed. We will manually verify the incoming payment. The appointment will be arranged individually.",
         "reversed": " (Reversed)"
@@ -847,8 +840,10 @@ def draw_card():
 
 @app.route("/api/generate-qr", methods=["POST"])
 def generate_qr():
-    language = get_language(request.args.get("lang", "de"))
     data = _json_body()
+    language = get_language(
+        (data or {}).get("lang", request.args.get("lang", "de"))
+    )
 
     if data is None:
         return jsonify({
@@ -863,6 +858,12 @@ def generate_qr():
             "status": "error",
             "message": MESSAGES[language]["invalid_service"]
         }), 400
+
+    if not REVOLUT_IBAN or not REVOLUT_BIC or not BENEFICIARY_NAME:
+        return jsonify({
+            "status": "error",
+            "message": MESSAGES[language]["payment_not_configured"]
+        }), 503
 
     service = SERVICES[service_id]
 
@@ -936,8 +937,10 @@ def generate_qr():
 
 @app.route("/api/reserve", methods=["POST"])
 def reserve():
-    language = get_language(request.args.get("lang", "de"))
     data = _json_body()
+    language = get_language(
+        (data or {}).get("lang", request.args.get("lang", "de"))
+    )
 
     if data is None:
         return jsonify({
@@ -967,6 +970,25 @@ def reserve():
             field_name="reference platby"
         )
 
+        fulfillment = _clean_text(
+            data.get("fulfillment", "email"),
+            max_length=20,
+            field_name="způsob doručení",
+            required=True
+        )
+
+        preferred_time = _clean_text(
+            data.get("preferred_time"),
+            max_length=160,
+            field_name="preferovaný termín"
+        )
+
+        website = _clean_text(
+            data.get("website"),
+            max_length=200,
+            field_name="kontrolní pole"
+        )
+
     except ValueError as exc:
         return jsonify({
             "status": "error",
@@ -983,6 +1005,21 @@ def reserve():
         return jsonify({
             "status": "error",
             "message": MESSAGES[language]["invalid_service"]
+        }), 400
+
+    if website:
+        # Tiché odmítnutí automatizovaných spamových odeslání.
+        return jsonify({
+            "status": "success",
+            "reference": "RECEIVED",
+            "payment_status": "pending_manual_confirmation",
+            "message": "Request received."
+        }), 200
+
+    if fulfillment not in {"email", "appointment"}:
+        return jsonify({
+            "status": "error",
+            "message": "Vyberte platný způsob doručení."
         }), 400
 
     if payment_reference and not re.fullmatch(
@@ -1016,6 +1053,12 @@ def reserve():
     safe_price = escape(price)
     safe_reservation_reference = escape(reservation_reference)
     safe_payment_line = escape(payment_line)
+    safe_fulfillment = (
+        "Digitální doručení e-mailem"
+        if fulfillment == "email"
+        else "Osobní domluva / individuální termín"
+    )
+    safe_preferred_time = escape(preferred_time) if preferred_time else "Neuvedeno"
 
     admin_html = f"""
     <div style="
@@ -1049,6 +1092,16 @@ def reserve():
         </p>
 
         <p>
+            <strong>Způsob doručení:</strong>
+            {safe_fulfillment}
+        </p>
+
+        <p>
+            <strong>Preferovaný termín:</strong>
+            {safe_preferred_time}
+        </p>
+
+        <p>
             <strong>Poznámka / záměr:</strong><br>
             {safe_note}
         </p>
@@ -1068,9 +1121,9 @@ def reserve():
     </div>
     """
 
-    if not resend.api_key:
+    if not resend.api_key or not ADMIN_EMAIL or not RESEND_FROM:
         logger.error(
-            "RESEND_API_KEY není nastaven; "
+            "Chybí RESEND_API_KEY, ADMIN_EMAIL nebo RESEND_FROM; "
             "objednávku nelze e-mailem předat administrátorovi."
         )
 
@@ -1091,6 +1144,58 @@ def reserve():
             "html": admin_html
         })
 
+        email_copy = {
+            "de": {
+                "subject": "Wir haben Ihre Anfrage erhalten",
+                "title": "Vielen Dank für Ihre Bestellung",
+                "accepted": "Wir haben Ihre Anfrage erhalten und zur Bearbeitung weitergeleitet.",
+                "next": "Nächster Schritt",
+                "payment": "Wir prüfen den Zahlungseingang zunächst manuell. Danach senden wir Ihre digitale Ausarbeitung per E-Mail oder stimmen den persönlichen Termin individuell mit Ihnen ab.",
+                "notice": "Diese Nachricht bestätigt den Eingang Ihrer Anfrage, nicht den Zahlungseingang und keine verbindliche Terminreservierung.",
+                "closing": "Herzliche Grüße"
+            },
+            "cs": {
+                "subject": "Potvrzení přijetí objednávky",
+                "title": "Děkujeme za vaši objednávku",
+                "accepted": "Vaši poptávku jsme přijali a předali ke zpracování.",
+                "next": "Další postup",
+                "payment": "Nejprve ručně ověříme připsání platby. Poté vám digitální výklad zašleme e-mailem, nebo s vámi individuálně domluvíme osobní termín.",
+                "notice": "Tato zpráva potvrzuje přijetí poptávky, nikoli přijetí platby ani závaznou rezervaci termínu.",
+                "closing": "S přáním krásného dne"
+            },
+            "en": {
+                "subject": "We received your request",
+                "title": "Thank you for your order",
+                "accepted": "We have received your request and sent it for processing.",
+                "next": "What happens next",
+                "payment": "We will first verify the payment manually. Then we will email your digital reading or contact you to arrange a personal appointment.",
+                "notice": "This message confirms receipt of your request, not receipt of payment or a confirmed appointment.",
+                "closing": "Warm regards"
+            }
+        }[language]
+
+        customer_html = f"""
+        <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;padding:28px;background:#10091b;color:#f3e8ff;line-height:1.7">
+            <p style="color:#d4af37;letter-spacing:3px">MYSTICKÁ SVATYNĚ</p>
+            <h2 style="color:#f0d99b">{email_copy["title"]}</h2>
+            <p>{email_copy["accepted"]}</p>
+            <p><strong>Order:</strong> {safe_reservation_reference}<br>
+            <strong>Service:</strong> {safe_service_title}<br>
+            <strong>Price:</strong> {safe_price}<br>
+            <strong>Payment reference:</strong> {safe_payment_line}</p>
+            <p><strong>{email_copy["next"]}:</strong> {email_copy["payment"]}</p>
+            <p style="color:#c8b9d8;font-size:13px">{email_copy["notice"]}</p>
+            <p>{email_copy["closing"]},<br><strong>Mystická Svatyně</strong></p>
+        </div>
+        """
+
+        resend.Emails.send({
+            "from": RESEND_FROM,
+            "to": [email],
+            "subject": f"{email_copy['subject']} — {reservation_reference}",
+            "html": customer_html
+        })
+
     except Exception:
         logger.exception(
             "Odeslání objednávky přes Resend selhalo."
@@ -1108,9 +1213,9 @@ def reserve():
         "payment_status": "pending_manual_confirmation",
         "message": (
             f"Poptávka {reservation_reference} byla přijata. "
-            "Platba zatím není potvrzena; objednávku ověříme "
-            "ručně po připsání peněz. "
-            "Termín bude domluven individuálně."
+            "Potvrzení jsme odeslali na váš e-mail. Platbu zatím "
+            "nemáme potvrzenou; po ručním ověření vám digitální "
+            "výstup doručíme e-mailem nebo domluvíme další postup."
         )
     })
 

@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#090711">
     <meta name="description" content="Mystická Svatyně – Tarot, Astrologie und persönliche Beratung.">
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Mystická Svatyně">
+    <meta property="og:title" content="Mystická Svatyně | Tarot & Astrologie">
+    <meta property="og:description" content="Ein Ort für Tarot, Astrologie, Symbolik und achtsame Selbstreflexion.">
+    <meta name="twitter:card" content="summary">
     <title>Mystická Svatyně | Tarot & Astrologie</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -410,6 +416,8 @@
         }
 
         .status-message:empty { display:none; }
+        .form-hint { margin-top:8px; color:var(--muted); font-size:11px; line-height:1.6; }
+        .honeypot { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
         .status-message.success { color:var(--success); border-color:var(--success); }
         .status-message.error { color:var(--danger); border-color:var(--danger); }
 
@@ -527,10 +535,76 @@
             .hero { min-height:480px; }
             .modal-content { padding:25px 18px; }
         }
+    
+        /* CELESTIAL PREMIUM EXPERIENCE */
+        body { isolation:isolate; }
+        body::before {
+            content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.42;
+            background-image:
+                radial-gradient(1px 1px at 8% 18%,rgba(245,226,181,.8) 50%,transparent 100%),
+                radial-gradient(1px 1px at 22% 74%,rgba(211,190,238,.8) 50%,transparent 100%),
+                radial-gradient(2px 2px at 78% 22%,rgba(245,226,181,.7) 50%,transparent 100%),
+                radial-gradient(1px 1px at 91% 66%,rgba(211,190,238,.8) 50%,transparent 100%),
+                radial-gradient(1px 1px at 56% 48%,rgba(245,226,181,.55) 50%,transparent 100%);
+            background-size:310px 290px,370px 340px,430px 390px,520px 470px,610px 560px;
+        }
+        .hero {
+            position:relative;min-height:660px;overflow:hidden;
+            border-bottom:1px solid rgba(216,183,106,.13);
+            background:radial-gradient(ellipse at 50% 42%,rgba(105,69,139,.25),transparent 42%),
+                       radial-gradient(ellipse at 50% 100%,rgba(178,135,70,.10),transparent 55%);
+        }
+        .hero::before {
+            content:"";position:absolute;width:min(580px,82vw);aspect-ratio:1;left:50%;top:50%;
+            transform:translate(-50%,-49%);border:1px solid rgba(216,183,106,.14);border-radius:50%;
+            box-shadow:0 0 0 24px rgba(216,183,106,.018),0 0 0 60px rgba(216,183,106,.012),inset 0 0 90px rgba(160,119,198,.08);
+            pointer-events:none;
+        }
+        .hero::after {
+            content:"☾";position:absolute;top:12%;right:calc(50% - min(390px,43vw));
+            color:rgba(240,217,155,.42);font:clamp(52px,8vw,94px) Georgia,serif;
+            text-shadow:0 0 35px rgba(216,183,106,.3);pointer-events:none;
+        }
+        .hero-content { position:relative;z-index:1; }
+        .hero h1 { margin:25px 0 12px;font-size:clamp(43px,8vw,88px);letter-spacing:.035em;text-shadow:0 10px 45px rgba(0,0,0,.55); }
+        .hero-tagline { max-width:700px;margin:0 auto 18px;color:var(--gold-light);font:500 clamp(15px,2vw,20px)/1.6 var(--serif);letter-spacing:.035em; }
+        .hero-copy { max-width:680px; }
+        .hero-note { color:var(--gold); }
+        .eyebrow { text-shadow:0 0 18px rgba(216,183,106,.18); }
+        .section { position:relative; }
+        .section-heading h2 { text-wrap:balance; }
+        .tarot-panel,.service-card,.promise,.booking-wrap,.library-card { backdrop-filter:blur(10px);box-shadow:0 18px 55px rgba(0,0,0,.18); }
+        .service-card { position:relative;overflow:hidden;transition:transform .28s ease,border-color .28s ease,background .28s ease; }
+        .service-card::after { content:"✧";position:absolute;right:18px;top:12px;color:rgba(216,183,106,.12);font-size:46px;pointer-events:none; }
+        .service-card:hover { transform:translateY(-5px);border-color:rgba(216,183,106,.58);background:rgba(35,26,52,.9); }
+        .button-primary { box-shadow:0 8px 26px rgba(195,154,75,.12); }
+        .button-primary:focus-visible,.button-secondary:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:2px solid var(--gold-light);outline-offset:3px; }
+        .library-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px; }
+        .library-card { min-height:220px;padding:28px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(36,26,54,.82),rgba(15,12,25,.88));transition:transform .25s ease,border-color .25s ease; }
+        .library-card:hover { transform:translateY(-4px);border-color:rgba(216,183,106,.58); }
+        .library-symbol { color:var(--gold);font:34px var(--serif); }
+        .library-card h3 { margin:16px 0 9px;color:var(--gold-light);font:500 19px var(--serif); }
+        .library-card p { color:var(--muted);font-size:12px;line-height:1.8; }
+        .faq-list { max-width:860px;margin:0 auto;display:grid;gap:12px; }
+        .faq-item { border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,rgba(36,26,54,.72),rgba(15,12,25,.82));overflow:hidden; }
+        .faq-item summary { position:relative;list-style:none;cursor:pointer;padding:20px 58px 20px 22px;color:var(--gold-light);font:500 16px/1.5 var(--serif); }
+        .faq-item summary::-webkit-details-marker { display:none; }
+        .faq-item summary::after { content:"＋";position:absolute;right:22px;top:50%;transform:translateY(-50%);color:var(--gold);font:22px var(--sans); }
+        .faq-item[open] summary::after { content:"−"; }
+        .faq-item p { padding:0 22px 22px;color:var(--muted);font-size:14px;line-height:1.85;max-width:760px; }
+        .faq-item summary:focus-visible { outline:2px solid var(--gold-light);outline-offset:-3px; }
+        .skip-link { position:absolute;left:12px;top:-60px;z-index:100;padding:10px 14px;background:var(--gold-light);color:#17111a; }
+        .skip-link:focus { top:12px; }
+        @media(max-width:800px) { .library-grid { grid-template-columns:1fr; } .hero { min-height:590px; } }
+        @media(prefers-reduced-motion:reduce) {
+            *,*::before,*::after { scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; }
+        }
+
     </style>
 </head>
 
 <body>
+<a class="skip-link" href="#top" data-i18n="skipLink">Přeskočit na obsah</a>
 <header>
     <div class="shell nav">
         <a class="brand" href="#top">
@@ -552,18 +626,21 @@
                 <a href="#tarot" data-i18n="navTarot">Tageskarte</a>
                 <a href="#sluzby" data-i18n="navServices">Angebote</a>
                 <a href="#pristup" data-i18n="navApproach">Unser Ansatz</a>
+                <a href="#knihovna" data-i18n="navLibrary">Knihovna</a>
+                <a href="#faq" data-i18n="navFaq">FAQ</a>
                 <a href="#rezervace" data-i18n="navBook">Beratung buchen</a>
             </nav>
         </div>
     </div>
 </header>
 
-<main id="top">
+<main id="top" tabindex="-1">
     <section class="hero">
         <div class="shell hero-content">
             <div class="eyebrow" data-i18n="eyebrow">Willkommen an einem Ort der Intuition und Ruhe</div>
 
             <h1>Mystická Svatyně</h1>
+            <p class="hero-tagline" data-i18n="heroTagline">Brána k tajemství magie</p>
 
             <p class="hero-copy" data-i18n="heroCopy">
                 Manchmal genügt es, einen Moment innezuhalten, die richtige Frage zu stellen und die eigene Geschichte aus einem neuen Blickwinkel zu betrachten.
@@ -674,6 +751,51 @@
         </div>
     </section>
 
+    <section class="section" id="knihovna">
+        <div class="shell">
+            <div class="section-heading">
+                <div class="eyebrow" data-i18n="libraryLabel">Symboly, příběhy a tradice</div>
+                <h2 data-i18n="libraryTitle">Vstupte do knihovny tajemství</h2>
+                <div class="ornament">✧</div>
+                <p data-i18n="libraryCopy">Objevujte archetypy, nebeské cykly a symboly, které po staletí inspirovaly lidskou představivost.</p>
+            </div>
+            <div class="library-grid">
+                <article class="library-card"><div class="library-symbol">☾</div><h3 data-i18n="libraryCard1Title">Měsíc a jeho cykly</h3><p data-i18n="libraryCard1Copy">Poznejte symboliku novoluní, úplňku a proměnlivých měsíčních fází jako inspiraci pro vlastní rituály a záměry.</p></article>
+                <article class="library-card"><div class="library-symbol">✧</div><h3 data-i18n="libraryCard2Title">Tarotové archetypy</h3><p data-i18n="libraryCard2Copy">Velká arkána jako mapa lidských zkušeností, vnitřních proměn a důležitých životních témat.</p></article>
+                <article class="library-card"><div class="library-symbol">♄</div><h3 data-i18n="libraryCard3Title">Astrologie a znamení</h3><p data-i18n="libraryCard3Copy">Symbolický jazyk planet, živlů a znamení zvěrokruhu – tradice, která zve k poznávání sebe sama.</p></article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="faq">
+        <div class="shell">
+            <div class="section-heading">
+                <div class="eyebrow" data-i18n="faqLabel">Gut zu wissen</div>
+                <h2 data-i18n="faqTitle">Fragen an die Svatyně</h2>
+                <div class="ornament">✧</div>
+                <p data-i18n="faqIntro">Ein paar klare Antworten, bevor Sie Ihren ersten Schritt machen.</p>
+            </div>
+            <div class="faq-list">
+                <details class="faq-item">
+                    <summary data-i18n="faqQ1">Sagt mir Tarot sicher voraus, was passieren wird?</summary>
+                    <p data-i18n="faqA1">Nein. Tarot wird hier als symbolischer Impuls zur Reflexion verstanden, nicht als garantierte Vorhersage oder Ersatz für professionelle Beratung.</p>
+                </details>
+                <details class="faq-item">
+                    <summary data-i18n="faqQ2">Wie funktioniert eine Anfrage?</summary>
+                    <p data-i18n="faqA2">Wählen Sie ein Angebot, geben Sie Ihre E-Mail-Adresse ein und senden Sie Ihre Anfrage. Die weitere Abstimmung erfolgt persönlich per E-Mail.</p>
+                </details>
+                <details class="faq-item">
+                    <summary data-i18n="faqQ3">Wann gilt eine Zahlung als bestätigt?</summary>
+                    <p data-i18n="faqA3">Der QR-Code bereitet eine SEPA-Überweisung vor. Eine Anfrage oder ein angezeigter QR-Code bestätigt keine Zahlung. Der Zahlungseingang wird manuell geprüft.</p>
+                </details>
+                <details class="faq-item">
+                    <summary data-i18n="faqQ4">Muss ich ein Kundenkonto anlegen?</summary>
+                    <p data-i18n="faqA4">Nein. Für eine Anfrage ist kein Kundenkonto und kein Passwort erforderlich. Ihre Angaben werden zur Bearbeitung der Anfrage per E-Mail übermittelt.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
     <section class="section" id="rezervace">
         <div class="shell">
             <div class="section-heading">
@@ -700,8 +822,27 @@
                     </div>
 
                     <div>
+                        <label for="res-fulfillment" data-i18n="fulfillmentLabel">Gewünschte Erfüllung</label>
+                        <select id="res-fulfillment" required>
+                            <option value="email" data-i18n="fulfillmentEmail">Digitaler Inhalt per E-Mail</option>
+                            <option value="appointment" data-i18n="fulfillmentAppointment">Persönliche Abstimmung / Termin</option>
+                        </select>
+                        <p class="form-hint" data-i18n="fulfillmentHint">Digitale Ausarbeitungen werden nach manueller Zahlungsbestätigung per E-Mail versendet. Persönliche Leistungen stimmen wir individuell mit Ihnen ab.</p>
+                    </div>
+
+                    <div id="appointment-preference-wrap" hidden>
+                        <label for="res-preferred-time" data-i18n="preferredTimeLabel">Wunschdatum oder bevorzugte Zeit (optional)</label>
+                        <input type="text" id="res-preferred-time" maxlength="160" autocomplete="off" placeholder="z. B. abends unter der Woche">
+                    </div>
+
+                    <div>
                         <label for="res-note" data-i18n="noteLabel">Notiz / Anliegen</label>
                         <textarea id="res-note" rows="4" maxlength="2000" placeholder="Beschreiben Sie kurz Ihr Anliegen..."></textarea>
+                    </div>
+
+                    <div class="honeypot" aria-hidden="true">
+                        <label for="res-website">Website</label>
+                        <input id="res-website" type="text" tabindex="-1" autocomplete="off">
                     </div>
 
                     <p id="reservation-payment-status" class="payment-status" data-i18n="paymentStatus">
@@ -768,7 +909,7 @@
 
         <div class="footer-links">
             <a href="#terms-modal" id="open-terms" data-i18n="terms">Terms & Privacy</a>
-            <a href="mailto:ruzar7789@gmail.com" data-i18n="contact">Contact</a>
+            <a href="#rezervace" data-i18n="contact">Contact form</a>
             <a href="#top" data-i18n="backTop">Back to top ↑</a>
         </div>
 
@@ -790,6 +931,19 @@
 
 const LANGUAGE_TEXTS = {
     de: {
+        navFaq:"Fragen",
+        faqLabel:"Gut zu wissen",
+        faqTitle:"Fragen an die Svatyně",
+        faqIntro:"Ein paar klare Antworten, bevor Sie Ihren ersten Schritt machen.",
+        faqQ1:"Sagt mir Tarot sicher voraus, was passieren wird?",
+        faqA1:"Nein. Tarot wird hier als symbolischer Impuls zur Reflexion verstanden, nicht als garantierte Vorhersage oder Ersatz für professionelle Beratung.",
+        faqQ2:"Wie funktioniert eine Anfrage?",
+        faqA2:"Wählen Sie ein Angebot, geben Sie Ihre E-Mail-Adresse ein und senden Sie Ihre Anfrage. Die weitere Abstimmung erfolgt persönlich per E-Mail.",
+        faqQ3:"Wann gilt eine Zahlung als bestätigt?",
+        faqA3:"Der QR-Code bereitet eine SEPA-Überweisung vor. Eine Anfrage oder ein angezeigter QR-Code bestätigt keine Zahlung. Der Zahlungseingang wird manuell geprüft.",
+        faqQ4:"Muss ich ein Kundenkonto anlegen?",
+        faqA4:"Nein. Für eine Anfrage ist kein Kundenkonto und kein Passwort erforderlich. Ihre Angaben werden zur Bearbeitung der Anfrage per E-Mail übermittelt.",
+        contact:"Kontaktformular",
         title:"Mystická Svatyně | Tarot, Astrologie & Beratung",
         description:"Mystická Svatyně – Tarot, Astrologie und persönliche Beratung.",
         navTarot:"Tageskarte",
@@ -801,6 +955,18 @@ const LANGUAGE_TEXTS = {
         heroServices:"Angebote entdecken",
         heroTarot:"Tageskarte ziehen",
         heroNote:"TAROT ✧ ASTROLOGIE ✧ PERSÖNLICHE BERATUNG",
+        skipLink:"Zum Inhalt springen",
+        navLibrary:"Bibliothek",
+        heroTagline:"Das Tor zu den Geheimnissen der Magie",
+        libraryLabel:"Symbole, Geschichten und Traditionen",
+        libraryTitle:"Betreten Sie die Bibliothek der Geheimnisse",
+        libraryCopy:"Entdecken Sie Archetypen, Himmelszyklen und Symbole, die seit Jahrhunderten die menschliche Vorstellungskraft inspirieren.",
+        libraryCard1Title:"Der Mond und seine Zyklen",
+        libraryCard1Copy:"Entdecken Sie die Symbolik von Neumond, Vollmond und Mondphasen als Inspiration für persönliche Rituale und Absichten.",
+        libraryCard2Title:"Tarot-Archetypen",
+        libraryCard2Copy:"Die Große Arkana als Spiegel menschlicher Erfahrungen, innerer Wandlung und bedeutender Lebensthemen.",
+        libraryCard3Title:"Astrologie und Sternzeichen",
+        libraryCard3Copy:"Die Symbolsprache der Planeten, Elemente und Tierkreiszeichen – eine Tradition, die zur Selbsterkenntnis einlädt.",
         dailyLabel:"Ein kleines tägliches Ritual",
         dailyTitle:"Ihre Karte für heute",
         dailyIntro:"Ziehen Sie eine symbolische Karte und nehmen Sie sich einen Moment Zeit für sich.",
@@ -830,6 +996,11 @@ const LANGUAGE_TEXTS = {
         emailLabel:"Ihre E-Mail-Adresse",
         serviceLabel:"Gewünschte Dienstleistung",
         noteLabel:"Notiz / Anliegen",
+        fulfillmentLabel:"Wie möchten Sie Ihre Leistung erhalten?",
+        fulfillmentEmail:"Digitale Ausarbeitung per E-Mail",
+        fulfillmentAppointment:"Persönliche Abstimmung / Termin",
+        fulfillmentHint:"Digitale Ausarbeitungen werden nach manueller Zahlungsbestätigung per E-Mail versendet. Persönliche Leistungen stimmen wir individuell mit Ihnen ab.",
+        preferredTimeLabel:"Wunschdatum oder bevorzugte Zeit (optional)",
         emailPlaceholder:"you@email.com",
         notePlaceholder:"Beschreiben Sie kurz Ihr Anliegen…",
         paymentStatus:"Bitte zeigen Sie zuerst den Zahlungs-QR-Code für Ihre ausgewählte Dienstleistung an. Danach können Sie Ihre Anfrage senden.",
@@ -842,7 +1013,7 @@ const LANGUAGE_TEXTS = {
         qrInstruction:"Bitte prüfen Sie Empfänger und Betrag, bevor Sie die Überweisung bestätigen. Senden Sie anschließend Ihre Anfrage.",
         manualCheck:"Die Zahlung wird anschließend manuell geprüft.",
         terms:"AGB & Datenschutz",
-        contact:"Kontakt",
+        contact:"Kontaktformular",
         backTop:"Nach oben ↑",
         disclaimer:"Tarot, Astrologie und Beratungen dienen der persönlichen Reflexion. Sie ersetzen keine professionelle medizinische, psychologische, rechtliche oder finanzielle Beratung.",
         termsTitle:"AGB & Datenschutz",
@@ -863,6 +1034,19 @@ const LANGUAGE_TEXTS = {
     },
 
     cs: {
+        navFaq:"Otázky",
+        faqLabel:"Co je dobré vědět",
+        faqTitle:"Časté otázky",
+        faqIntro:"Několik jasných odpovědí, než uděláte první krok.",
+        faqQ1:"Předpoví tarot jistě, co se stane?",
+        faqA1:"Ne. Tarot zde chápeme jako symbolický podnět k zamyšlení, nikoli jako zaručenou předpověď nebo náhradu odborné rady.",
+        faqQ2:"Jak funguje odeslání poptávky?",
+        faqA2:"Vyberte službu, zadejte svůj e-mail a odešlete poptávku. Další domluva probíhá osobně prostřednictvím e-mailu.",
+        faqQ3:"Kdy je platba považována za potvrzenou?",
+        faqA3:"QR kód pouze připraví SEPA bankovní převod. Odeslání poptávky ani zobrazení QR kódu nepotvrzuje platbu. Připsání peněz ověřujeme ručně.",
+        faqQ4:"Musím si vytvořit zákaznický účet?",
+        faqA4:"Ne. Pro odeslání poptávky nepotřebujete účet ani heslo. Vaše údaje jsou předány e-mailem za účelem vyřízení poptávky.",
+        contact:"Kontaktní formulář",
         title:"Mystická Svatyně | Tarot, astrologie a konzultace",
         description:"Mystická Svatyně – osobní výklady tarotu, astrologie a individuální konzultace.",
         navTarot:"Denní tarot",
@@ -874,6 +1058,18 @@ const LANGUAGE_TEXTS = {
         heroServices:"Objevit nabídku služeb",
         heroTarot:"Vytáhnout denní kartu",
         heroNote:"TAROT ✧ ASTROLOGIE ✧ OSOBNÍ KONZULTACE",
+        skipLink:"Přeskočit na obsah",
+        navLibrary:"Knihovna",
+        heroTagline:"Brána k tajemství magie",
+        libraryLabel:"Symboly, příběhy a tradice",
+        libraryTitle:"Vstupte do knihovny tajemství",
+        libraryCopy:"Objevujte archetypy, nebeské cykly a symboly, které po staletí inspirovaly lidskou představivost.",
+        libraryCard1Title:"Měsíc a jeho cykly",
+        libraryCard1Copy:"Poznejte symboliku novoluní, úplňku a proměnlivých měsíčních fází jako inspiraci pro vlastní rituály a záměry.",
+        libraryCard2Title:"Tarotové archetypy",
+        libraryCard2Copy:"Velká arkána jako mapa lidských zkušeností, vnitřních proměn a důležitých životních témat.",
+        libraryCard3Title:"Astrologie a znamení",
+        libraryCard3Copy:"Symbolický jazyk planet, živlů a znamení zvěrokruhu – tradice, která zve k poznávání sebe sama.",
         dailyLabel:"Malý každodenní rituál",
         dailyTitle:"Karta pro dnešní den",
         dailyIntro:"Vytáhněte si symbolickou kartu a dopřejte si chvíli k zamyšlení.",
@@ -903,6 +1099,11 @@ const LANGUAGE_TEXTS = {
         emailLabel:"Váš e-mail",
         serviceLabel:"Požadovaná služba",
         noteLabel:"Poznámka / záměr",
+        fulfillmentLabel:"Jak si přejete službu obdržet?",
+        fulfillmentEmail:"Digitální výklad e-mailem",
+        fulfillmentAppointment:"Osobní domluva / termín",
+        fulfillmentHint:"Digitální výklady odešleme e-mailem po ručním potvrzení platby. Osobní služby s vámi domluvíme individuálně.",
+        preferredTimeLabel:"Preferovaný termín nebo čas (volitelné)",
         emailPlaceholder:"vas@email.cz",
         notePlaceholder:"Napište krátce o vašem záměru…",
         paymentStatus:"Nejprve si zobrazte platební QR kód pro vybranou službu. Poté můžete odeslat objednávku.",
@@ -915,7 +1116,7 @@ const LANGUAGE_TEXTS = {
         qrInstruction:"Před potvrzením platby zkontrolujte příjemce a částku. Po zaplacení odešlete rezervační formulář.",
         manualCheck:"Platbu následně ověříme ručně.",
         terms:"Obchodní podmínky & GDPR",
-        contact:"Kontakt",
+        contact:"Kontaktformular",
         backTop:"Zpět nahoru ↑",
         disclaimer:"Výklady tarotu, astrologie a konzultace slouží pro osobní rozvoj a sebereflexi. Nenahrazují odborné lékařské, psychologické, právní ani finanční poradenství.",
         termsTitle:"Obchodní podmínky & GDPR",
@@ -936,6 +1137,19 @@ const LANGUAGE_TEXTS = {
     },
 
     en: {
+        navFaq:"FAQ",
+        faqLabel:"Good to know",
+        faqTitle:"Questions for the Sanctuary",
+        faqIntro:"A few clear answers before you take your first step.",
+        faqQ1:"Does tarot reliably predict what will happen?",
+        faqA1:"No. Tarot is presented here as a symbolic prompt for reflection, not a guaranteed prediction or a substitute for professional advice.",
+        faqQ2:"How does an enquiry work?",
+        faqA2:"Choose a service, enter your email address and submit your enquiry. We will coordinate the next steps with you personally by email.",
+        faqQ3:"When is a payment considered confirmed?",
+        faqA3:"The QR code prepares a SEPA bank transfer. Submitting an enquiry or displaying a QR code does not confirm payment. Incoming payments are checked manually.",
+        faqQ4:"Do I need to create a customer account?",
+        faqA4:"No. You do not need an account or password to make an enquiry. Your details are sent by email so the enquiry can be handled.",
+        contact:"Contact form",
         title:"Mystická Svatyně | Tarot, Astrology & Consultations",
         description:"Mystická Svatyně – personal tarot readings, astrology services and individual consultations.",
         navTarot:"Daily tarot",
@@ -947,6 +1161,18 @@ const LANGUAGE_TEXTS = {
         heroServices:"Explore our services",
         heroTarot:"Draw your daily card",
         heroNote:"TAROT ✧ ASTROLOGY ✧ PERSONAL CONSULTATIONS",
+        skipLink:"Skip to content",
+        navLibrary:"Library",
+        heroTagline:"The gateway to the mysteries of magic",
+        libraryLabel:"Symbols, stories and traditions",
+        libraryTitle:"Enter the Library of Mysteries",
+        libraryCopy:"Explore archetypes, celestial cycles and symbols that have inspired the human imagination for centuries.",
+        libraryCard1Title:"The Moon and its cycles",
+        libraryCard1Copy:"Discover the symbolism of the new moon, full moon and changing lunar phases as inspiration for personal rituals and intentions.",
+        libraryCard2Title:"Tarot archetypes",
+        libraryCard2Copy:"The Major Arcana as a map of human experience, inner transformation and meaningful life themes.",
+        libraryCard3Title:"Astrology and the zodiac",
+        libraryCard3Copy:"The symbolic language of planets, elements and zodiac signs – a tradition that invites self-discovery.",
         dailyLabel:"A small daily ritual",
         dailyTitle:"Your card for today",
         dailyIntro:"Draw a symbolic card and take a moment to reflect on what matters to you.",
@@ -976,6 +1202,11 @@ const LANGUAGE_TEXTS = {
         emailLabel:"Your email",
         serviceLabel:"Requested service",
         noteLabel:"Note / intention",
+        fulfillmentLabel:"How would you like to receive your service?",
+        fulfillmentEmail:"Digital reading by email",
+        fulfillmentAppointment:"Personal arrangement / appointment",
+        fulfillmentHint:"Digital readings are emailed after manual payment confirmation. Personal services are arranged individually with you.",
+        preferredTimeLabel:"Preferred date or time (optional)",
         emailPlaceholder:"you@email.com",
         notePlaceholder:"Briefly describe your intention…",
         paymentStatus:"First display the payment QR code for your selected service. You can then submit your request.",
@@ -988,7 +1219,7 @@ const LANGUAGE_TEXTS = {
         qrInstruction:"Before confirming the transfer, check the recipient and amount. After paying, submit the booking form.",
         manualCheck:"The payment will then be checked manually.",
         terms:"Terms & Privacy",
-        contact:"Contact",
+        contact:"Contact form",
         backTop:"Back to top ↑",
         disclaimer:"Tarot, astrology and consultations are intended for personal reflection. They do not replace professional medical, psychological, legal or financial advice.",
         termsTitle:"Terms & Privacy",
@@ -1115,6 +1346,7 @@ function updatePaymentStatus(message) {
    ========================================================= */
 
 function setLanguage(language) {
+    document.documentElement.lang = language;
     if (!LANGUAGE_TEXTS[language]) {
         language = "de";
     }
@@ -1439,6 +1671,16 @@ document.getElementById("res-service").addEventListener("change",() => {
     clearReservationMessage();
 });
 
+const fulfillmentSelect = document.getElementById("res-fulfillment");
+const appointmentPreferenceWrap = document.getElementById("appointment-preference-wrap");
+
+function updateFulfillmentFields() {
+    appointmentPreferenceWrap.hidden = fulfillmentSelect.value !== "appointment";
+}
+
+fulfillmentSelect.addEventListener("change",updateFulfillmentFields);
+updateFulfillmentFields();
+
 
 /* =========================================================
    MODÁLNÍ OKNA
@@ -1516,11 +1758,17 @@ document.getElementById("reservation-form").addEventListener("submit",async even
     const emailInput = document.getElementById("res-email");
     const serviceSelect = document.getElementById("res-service");
     const noteInput = document.getElementById("res-note");
+    const fulfillmentSelect = document.getElementById("res-fulfillment");
+    const preferredTimeInput = document.getElementById("res-preferred-time");
+    const honeypotInput = document.getElementById("res-website");
     const submitButton = document.getElementById("res-submit-btn");
 
     const email = emailInput.value.trim();
     const service = serviceSelect.value;
     const note = noteInput.value.trim();
+    const fulfillment = fulfillmentSelect.value;
+    const preferredTime = preferredTimeInput.value.trim();
+    const honeypot = honeypotInput.value;
 
     const t = LANGUAGE_TEXTS[currentLanguage];
 
@@ -1550,6 +1798,9 @@ document.getElementById("reservation-form").addEventListener("submit",async even
                 email:email,
                 service:service,
                 note:note,
+                fulfillment:fulfillment,
+                preferred_time:preferredTime,
+                website:honeypot,
                 payment_reference:currentPaymentReference,
                 lang:currentLanguage
             })
@@ -1572,6 +1823,9 @@ document.getElementById("reservation-form").addEventListener("submit",async even
 
         emailInput.value = "";
         noteInput.value = "";
+        preferredTimeInput.value = "";
+        honeypotInput.value = "";
+        fulfillmentSelect.value = "email";
 
         currentPaymentReference = null;
         currentQrServiceId = null;
