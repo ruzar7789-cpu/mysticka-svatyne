@@ -970,6 +970,25 @@ def reserve():
             field_name="reference platby"
         )
 
+        fulfillment = _clean_text(
+            data.get("fulfillment", "email"),
+            max_length=20,
+            field_name="způsob doručení",
+            required=True
+        )
+
+        preferred_time = _clean_text(
+            data.get("preferred_time"),
+            max_length=160,
+            field_name="preferovaný termín"
+        )
+
+        website = _clean_text(
+            data.get("website"),
+            max_length=200,
+            field_name="kontrolní pole"
+        )
+
     except ValueError as exc:
         return jsonify({
             "status": "error",
@@ -986,6 +1005,21 @@ def reserve():
         return jsonify({
             "status": "error",
             "message": MESSAGES[language]["invalid_service"]
+        }), 400
+
+    if website:
+        # Tiché odmítnutí automatizovaných spamových odeslání.
+        return jsonify({
+            "status": "success",
+            "reference": "RECEIVED",
+            "payment_status": "pending_manual_confirmation",
+            "message": MESSAGES[language]["reservation_sent"]
+        }), 200
+
+    if fulfillment not in {"email", "appointment"}:
+        return jsonify({
+            "status": "error",
+            "message": "Vyberte platný způsob doručení."
         }), 400
 
     if payment_reference and not re.fullmatch(
@@ -1019,6 +1053,12 @@ def reserve():
     safe_price = escape(price)
     safe_reservation_reference = escape(reservation_reference)
     safe_payment_line = escape(payment_line)
+    safe_fulfillment = (
+        "Digitální doručení e-mailem"
+        if fulfillment == "email"
+        else "Osobní domluva / individuální termín"
+    )
+    safe_preferred_time = escape(preferred_time) if preferred_time else "Neuvedeno"
 
     admin_html = f"""
     <div style="
@@ -1049,6 +1089,16 @@ def reserve():
         <p>
             <strong>Reference platby:</strong>
             {safe_payment_line}
+        </p>
+
+        <p>
+            <strong>Způsob doručení:</strong>
+            {safe_fulfillment}
+        </p>
+
+        <p>
+            <strong>Preferovaný termín:</strong>
+            {safe_preferred_time}
         </p>
 
         <p>
@@ -1094,6 +1144,28 @@ def reserve():
             "html": admin_html
         })
 
+        customer_html = f"""
+        <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;padding:28px;background:#10091b;color:#f3e8ff;line-height:1.7">
+            <p style="color:#d4af37;letter-spacing:3px">MYSTICKÁ SVATYNĚ</p>
+            <h2 style="color:#f0d99b">Děkujeme za vaši objednávku</h2>
+            <p>Vaši poptávku jsme přijali a předali ke zpracování.</p>
+            <p><strong>Objednávka:</strong> {safe_reservation_reference}<br>
+            <strong>Služba:</strong> {safe_service_title}<br>
+            <strong>Cena:</strong> {safe_price}<br>
+            <strong>Reference platby:</strong> {safe_payment_line}</p>
+            <p><strong>Další postup:</strong> {safe_fulfillment}. Platbu nejprve ručně ověříme. Poté vám digitální výstup zašleme na tento e-mail, nebo se vám ozveme k individuální domluvě termínu.</p>
+            <p style="color:#c8b9d8;font-size:13px">Tato zpráva potvrzuje přijetí poptávky, nikoli přijetí platby ani rezervaci konkrétního termínu.</p>
+            <p>S přáním krásného dne,<br><strong>Mystická Svatyně</strong></p>
+        </div>
+        """
+
+        resend.Emails.send({
+            "from": RESEND_FROM,
+            "to": [email],
+            "subject": f"Potvrzení přijetí objednávky {reservation_reference}",
+            "html": customer_html
+        })
+
     except Exception:
         logger.exception(
             "Odeslání objednávky přes Resend selhalo."
@@ -1111,9 +1183,9 @@ def reserve():
         "payment_status": "pending_manual_confirmation",
         "message": (
             f"Poptávka {reservation_reference} byla přijata. "
-            "Platba zatím není potvrzena; objednávku ověříme "
-            "ručně po připsání peněz. "
-            "Termín bude domluven individuálně."
+            "Potvrzení jsme odeslali na váš e-mail. Platbu zatím "
+            "nemáme potvrzenou; po ručním ověření vám digitální "
+            "výstup doručíme e-mailem nebo domluvíme další postup."
         )
     })
 
