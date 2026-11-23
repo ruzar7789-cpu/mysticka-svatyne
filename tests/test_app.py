@@ -15,6 +15,9 @@ class MystickaSvatyneTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Mystická Svatyně".encode("utf-8"), response.data)
         self.assertIn(b"id=\"knihovna\"", response.data)
+        self.assertIn(b'id="faq"', response.data)
+        self.assertIn(b'href="#rezervace" data-i18n="contact"', response.data)
+        self.assertNotIn(b"ruzar7789@gmail.com", response.data)
 
     def test_daily_card_respects_requested_language(self):
         response = self.client.get("/api/draw-card?lang=cs")
