@@ -527,10 +527,68 @@
             .hero { min-height:480px; }
             .modal-content { padding:25px 18px; }
         }
+    
+        /* CELESTIAL PREMIUM EXPERIENCE */
+        body { isolation:isolate; }
+        body::before {
+            content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.42;
+            background-image:
+                radial-gradient(1px 1px at 8% 18%,rgba(245,226,181,.8) 50%,transparent 100%),
+                radial-gradient(1px 1px at 22% 74%,rgba(211,190,238,.8) 50%,transparent 100%),
+                radial-gradient(2px 2px at 78% 22%,rgba(245,226,181,.7) 50%,transparent 100%),
+                radial-gradient(1px 1px at 91% 66%,rgba(211,190,238,.8) 50%,transparent 100%),
+                radial-gradient(1px 1px at 56% 48%,rgba(245,226,181,.55) 50%,transparent 100%);
+            background-size:310px 290px,370px 340px,430px 390px,520px 470px,610px 560px;
+        }
+        .hero {
+            position:relative;min-height:660px;overflow:hidden;
+            border-bottom:1px solid rgba(216,183,106,.13);
+            background:radial-gradient(ellipse at 50% 42%,rgba(105,69,139,.25),transparent 42%),
+                       radial-gradient(ellipse at 50% 100%,rgba(178,135,70,.10),transparent 55%);
+        }
+        .hero::before {
+            content:"";position:absolute;width:min(580px,82vw);aspect-ratio:1;left:50%;top:50%;
+            transform:translate(-50%,-49%);border:1px solid rgba(216,183,106,.14);border-radius:50%;
+            box-shadow:0 0 0 24px rgba(216,183,106,.018),0 0 0 60px rgba(216,183,106,.012),inset 0 0 90px rgba(160,119,198,.08);
+            pointer-events:none;
+        }
+        .hero::after {
+            content:"☾";position:absolute;top:12%;right:calc(50% - min(390px,43vw));
+            color:rgba(240,217,155,.42);font:clamp(52px,8vw,94px) Georgia,serif;
+            text-shadow:0 0 35px rgba(216,183,106,.3);pointer-events:none;
+        }
+        .hero-content { position:relative;z-index:1; }
+        .hero h1 { margin:25px 0 12px;font-size:clamp(43px,8vw,88px);letter-spacing:.035em;text-shadow:0 10px 45px rgba(0,0,0,.55); }
+        .hero-tagline { max-width:700px;margin:0 auto 18px;color:var(--gold-light);font:500 clamp(15px,2vw,20px)/1.6 var(--serif);letter-spacing:.035em; }
+        .hero-copy { max-width:680px; }
+        .hero-note { color:var(--gold); }
+        .eyebrow { text-shadow:0 0 18px rgba(216,183,106,.18); }
+        .section { position:relative; }
+        .section-heading h2 { text-wrap:balance; }
+        .tarot-panel,.service-card,.promise,.booking-wrap,.library-card { backdrop-filter:blur(10px);box-shadow:0 18px 55px rgba(0,0,0,.18); }
+        .service-card { position:relative;overflow:hidden;transition:transform .28s ease,border-color .28s ease,background .28s ease; }
+        .service-card::after { content:"✧";position:absolute;right:18px;top:12px;color:rgba(216,183,106,.12);font-size:46px;pointer-events:none; }
+        .service-card:hover { transform:translateY(-5px);border-color:rgba(216,183,106,.58);background:rgba(35,26,52,.9); }
+        .button-primary { box-shadow:0 8px 26px rgba(195,154,75,.12); }
+        .button-primary:focus-visible,.button-secondary:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:2px solid var(--gold-light);outline-offset:3px; }
+        .library-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px; }
+        .library-card { min-height:220px;padding:28px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(36,26,54,.82),rgba(15,12,25,.88));transition:transform .25s ease,border-color .25s ease; }
+        .library-card:hover { transform:translateY(-4px);border-color:rgba(216,183,106,.58); }
+        .library-symbol { color:var(--gold);font:34px var(--serif); }
+        .library-card h3 { margin:16px 0 9px;color:var(--gold-light);font:500 19px var(--serif); }
+        .library-card p { color:var(--muted);font-size:12px;line-height:1.8; }
+        .skip-link { position:absolute;left:12px;top:-60px;z-index:100;padding:10px 14px;background:var(--gold-light);color:#17111a; }
+        .skip-link:focus { top:12px; }
+        @media(max-width:800px) { .library-grid { grid-template-columns:1fr; } .hero { min-height:590px; } }
+        @media(prefers-reduced-motion:reduce) {
+            *,*::before,*::after { scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; }
+        }
+
     </style>
 </head>
 
 <body>
+<a class="skip-link" href="#main-content" data-i18n="skipLink">Přeskočit na obsah</a>
 <header>
     <div class="shell nav">
         <a class="brand" href="#top">
@@ -552,18 +610,20 @@
                 <a href="#tarot" data-i18n="navTarot">Tageskarte</a>
                 <a href="#sluzby" data-i18n="navServices">Angebote</a>
                 <a href="#pristup" data-i18n="navApproach">Unser Ansatz</a>
+                <a href="#knihovna" data-i18n="navLibrary">Knihovna</a>
                 <a href="#rezervace" data-i18n="navBook">Beratung buchen</a>
             </nav>
         </div>
     </div>
 </header>
 
-<main id="top">
+<main id="main-content" tabindex="-1">
     <section class="hero">
         <div class="shell hero-content">
             <div class="eyebrow" data-i18n="eyebrow">Willkommen an einem Ort der Intuition und Ruhe</div>
 
             <h1>Mystická Svatyně</h1>
+            <p class="hero-tagline" data-i18n="heroTagline">Brána k tajemství magie</p>
 
             <p class="hero-copy" data-i18n="heroCopy">
                 Manchmal genügt es, einen Moment innezuhalten, die richtige Frage zu stellen und die eigene Geschichte aus einem neuen Blickwinkel zu betrachten.
@@ -670,6 +730,22 @@
                     <h3 data-i18n="promise3">Respekt und Diskretion</h3>
                     <p data-i18n="promise3p">Kommunikation mit Respekt für Ihre Privatsphäre.</p>
                 </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="knihovna">
+        <div class="shell">
+            <div class="section-heading">
+                <div class="eyebrow" data-i18n="libraryLabel">Symboly, příběhy a tradice</div>
+                <h2 data-i18n="libraryTitle">Vstupte do knihovny tajemství</h2>
+                <div class="ornament">✧</div>
+                <p data-i18n="libraryCopy">Objevujte archetypy, nebeské cykly a symboly, které po staletí inspirovaly lidskou představivost.</p>
+            </div>
+            <div class="library-grid">
+                <article class="library-card"><div class="library-symbol">☾</div><h3 data-i18n="libraryCard1Title">Měsíc a jeho cykly</h3><p data-i18n="libraryCard1Copy">Poznejte symboliku novoluní, úplňku a proměnlivých měsíčních fází jako inspiraci pro vlastní rituály a záměry.</p></article>
+                <article class="library-card"><div class="library-symbol">✧</div><h3 data-i18n="libraryCard2Title">Tarotové archetypy</h3><p data-i18n="libraryCard2Copy">Velká arkána jako mapa lidských zkušeností, vnitřních proměn a důležitých životních témat.</p></article>
+                <article class="library-card"><div class="library-symbol">♄</div><h3 data-i18n="libraryCard3Title">Astrologie a znamení</h3><p data-i18n="libraryCard3Copy">Symbolický jazyk planet, živlů a znamení zvěrokruhu – tradice, která zve k poznávání sebe sama.</p></article>
             </div>
         </div>
     </section>
@@ -801,6 +877,18 @@ const LANGUAGE_TEXTS = {
         heroServices:"Angebote entdecken",
         heroTarot:"Tageskarte ziehen",
         heroNote:"TAROT ✧ ASTROLOGIE ✧ PERSÖNLICHE BERATUNG",
+        skipLink:"Zum Inhalt springen",
+        navLibrary:"Bibliothek",
+        heroTagline:"Das Tor zu den Geheimnissen der Magie",
+        libraryLabel:"Symbole, Geschichten und Traditionen",
+        libraryTitle:"Betreten Sie die Bibliothek der Geheimnisse",
+        libraryCopy:"Entdecken Sie Archetypen, Himmelszyklen und Symbole, die seit Jahrhunderten die menschliche Vorstellungskraft inspirieren.",
+        libraryCard1Title:"Der Mond und seine Zyklen",
+        libraryCard1Copy:"Entdecken Sie die Symbolik von Neumond, Vollmond und Mondphasen als Inspiration für persönliche Rituale und Absichten.",
+        libraryCard2Title:"Tarot-Archetypen",
+        libraryCard2Copy:"Die Große Arkana als Spiegel menschlicher Erfahrungen, innerer Wandlung und bedeutender Lebensthemen.",
+        libraryCard3Title:"Astrologie und Sternzeichen",
+        libraryCard3Copy:"Die Symbolsprache der Planeten, Elemente und Tierkreiszeichen – eine Tradition, die zur Selbsterkenntnis einlädt.",
         dailyLabel:"Ein kleines tägliches Ritual",
         dailyTitle:"Ihre Karte für heute",
         dailyIntro:"Ziehen Sie eine symbolische Karte und nehmen Sie sich einen Moment Zeit für sich.",
@@ -874,6 +962,18 @@ const LANGUAGE_TEXTS = {
         heroServices:"Objevit nabídku služeb",
         heroTarot:"Vytáhnout denní kartu",
         heroNote:"TAROT ✧ ASTROLOGIE ✧ OSOBNÍ KONZULTACE",
+        skipLink:"Přeskočit na obsah",
+        navLibrary:"Knihovna",
+        heroTagline:"Brána k tajemství magie",
+        libraryLabel:"Symboly, příběhy a tradice",
+        libraryTitle:"Vstupte do knihovny tajemství",
+        libraryCopy:"Objevujte archetypy, nebeské cykly a symboly, které po staletí inspirovaly lidskou představivost.",
+        libraryCard1Title:"Měsíc a jeho cykly",
+        libraryCard1Copy:"Poznejte symboliku novoluní, úplňku a proměnlivých měsíčních fází jako inspiraci pro vlastní rituály a záměry.",
+        libraryCard2Title:"Tarotové archetypy",
+        libraryCard2Copy:"Velká arkána jako mapa lidských zkušeností, vnitřních proměn a důležitých životních témat.",
+        libraryCard3Title:"Astrologie a znamení",
+        libraryCard3Copy:"Symbolický jazyk planet, živlů a znamení zvěrokruhu – tradice, která zve k poznávání sebe sama.",
         dailyLabel:"Malý každodenní rituál",
         dailyTitle:"Karta pro dnešní den",
         dailyIntro:"Vytáhněte si symbolickou kartu a dopřejte si chvíli k zamyšlení.",
@@ -947,6 +1047,18 @@ const LANGUAGE_TEXTS = {
         heroServices:"Explore our services",
         heroTarot:"Draw your daily card",
         heroNote:"TAROT ✧ ASTROLOGY ✧ PERSONAL CONSULTATIONS",
+        skipLink:"Skip to content",
+        navLibrary:"Library",
+        heroTagline:"The gateway to the mysteries of magic",
+        libraryLabel:"Symbols, stories and traditions",
+        libraryTitle:"Enter the Library of Mysteries",
+        libraryCopy:"Explore archetypes, celestial cycles and symbols that have inspired the human imagination for centuries.",
+        libraryCard1Title:"The Moon and its cycles",
+        libraryCard1Copy:"Discover the symbolism of the new moon, full moon and changing lunar phases as inspiration for personal rituals and intentions.",
+        libraryCard2Title:"Tarot archetypes",
+        libraryCard2Copy:"The Major Arcana as a map of human experience, inner transformation and meaningful life themes.",
+        libraryCard3Title:"Astrology and the zodiac",
+        libraryCard3Copy:"The symbolic language of planets, elements and zodiac signs – a tradition that invites self-discovery.",
         dailyLabel:"A small daily ritual",
         dailyTitle:"Your card for today",
         dailyIntro:"Draw a symbolic card and take a moment to reflect on what matters to you.",
