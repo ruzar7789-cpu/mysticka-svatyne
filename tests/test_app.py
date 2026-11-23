@@ -18,6 +18,8 @@ class MystickaSvatyneTests(unittest.TestCase):
         self.assertIn(b'id="faq"', response.data)
         self.assertIn(b'href="#rezervace" data-i18n="contact"', response.data)
         self.assertNotIn(b"ruzar7789@gmail.com", response.data)
+        self.assertIn(b'id="res-fulfillment"', response.data)
+        self.assertIn(b'id="res-preferred-time"', response.data)
 
     def test_daily_card_respects_requested_language(self):
         response = self.client.get("/api/draw-card?lang=cs")
@@ -58,6 +60,43 @@ class MystickaSvatyneTests(unittest.TestCase):
         response = self.client.post(
             "/api/generate-qr",
             json={"service_id": "not-a-service", "lang": "cs"},
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_reservation_sends_admin_and_customer_emails(self):
+        with patch.object(site, "ADMIN_EMAIL", "admin@example.com"), \
+             patch.object(site, "RESEND_FROM", "Mysticka Svatyne <noreply@example.com>"), \
+             patch.object(site.resend, "api_key", "test-key"), \
+             patch.object(site.resend.Emails, "send") as send_email:
+            response = self.client.post(
+                "/api/reserve",
+                json={
+                    "email": "customer@example.com",
+                    "service": "tarot_basic",
+                    "note": "Please focus on career.",
+                    "fulfillment": "email",
+                    "preferred_time": "",
+                    "website": "",
+                    "payment_reference": "MS-A1B2C3D4",
+                    "lang": "cs",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["status"], "success")
+        self.assertEqual(send_email.call_count, 2)
+        self.assertEqual(send_email.call_args_list[0].args[0]["to"], ["admin@example.com"])
+        self.assertEqual(send_email.call_args_list[1].args[0]["to"], ["customer@example.com"])
+
+    def test_reservation_rejects_unknown_fulfilment_method(self):
+        response = self.client.post(
+            "/api/reserve",
+            json={
+                "email": "customer@example.com",
+                "service": "tarot_basic",
+                "fulfillment": "carrier-pigeon",
+                "lang": "cs",
+            },
         )
         self.assertEqual(response.status_code, 400)
 
