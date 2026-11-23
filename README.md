@@ -9,6 +9,8 @@ Prémiový vícejazyčný web pro tarot, astrologii a symbolickou duchovní insp
 - Tarotový balíček Velké arkány
 - SEPA QR platební příkazy
 - E-mailové předávání objednávek přes Resend
+- Potvrzení přijetí objednávky zákazníkovi v jazyce DE/CS/EN
+- Volba digitálního doručení e-mailem nebo individuální domluvy termínu
 - Jazyky: němčina (výchozí), čeština a angličtina
 
 ## Architektura a soukromí
@@ -48,7 +50,11 @@ Na Windows aktivujte prostředí příkazem `.venv\\Scripts\\activate`.
 - `GET /` — web
 - `GET /api/draw-card?lang=de|cs|en` — denní tarotová karta
 - `POST /api/generate-qr` — vytvoření SEPA QR
-- `POST /api/reserve` — předání objednávky e-mailem
+- `POST /api/reserve` — předání objednávky administrátorovi a potvrzení zákazníkovi
+
+## Objednávka a doručení
+
+Zákazník zvolí digitální doručení e-mailem nebo osobní službu s individuální domluvou termínu. Preferovaný čas může uvést ve formuláři. Objednávka se předá administrátorovi a zákazník dostane potvrzení v jazyce DE/CS/EN. Platba zůstává ručně ověřovaná; potvrzovací e-mail není potvrzením platby ani termínu. Po ověření platby provozovatel ručně odešle hotový digitální výstup, případně domluví osobní službu. Aplikace nadále nepoužívá databázi ani zákaznické účty.
 
 ## Před ostrým spuštěním
 
