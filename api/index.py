@@ -20,30 +20,20 @@ app.config["MAX_CONTENT_LENGTH"] = 16 * 1024
 # KONFIGURACE PLATEB A E-MAILU
 # ---------------------------------------------------------
 
-REVOLUT_IBAN = os.getenv(
-    "REVOLUT_IBAN",
-    "LT803250069633761109"
-).replace(" ", "").upper()
+# Bankovní údaje se načítají výhradně z chráněných proměnných prostředí.
+# Nikdy je nevkládejte přímo do zdrojového kódu ani repozitáře.
+REVOLUT_IBAN = os.getenv("REVOLUT_IBAN", "").replace(" ", "").upper()
 
-REVOLUT_BIC = os.getenv(
-    "REVOLUT_BIC",
-    "REVOLT21"
-).replace(" ", "").upper()
+REVOLUT_BIC = os.getenv("REVOLUT_BIC", "").replace(" ", "").upper()
 
 BENEFICIARY_NAME = os.getenv(
     "PAYMENT_BENEFICIARY_NAME",
     "Mystická Svatyně"
 )
 
-ADMIN_EMAIL = os.getenv(
-    "ADMIN_EMAIL",
-    "ruzar7789@gmail.com"
-).strip()
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "").strip()
 
-RESEND_FROM = os.getenv(
-    "RESEND_FROM",
-    "Mystická Svatyně <onboarding@resend.dev>"
-).strip()
+RESEND_FROM = os.getenv("RESEND_FROM", "").strip()
 
 resend.api_key = os.getenv("RESEND_API_KEY", "")
 
@@ -78,6 +68,7 @@ MESSAGES = {
         "reservation_error": "Die Anfrage konnte momentan nicht gesendet werden. Bitte versuchen Sie es später erneut.",
         "send_error": "Das Senden der Anfrage ist fehlgeschlagen. Bitte versuchen Sie es später erneut.",
         "payment_notice": "Die Zahlung wird erst nach manueller Prüfung des Zahlungseingangs bestätigt.",
+        "payment_not_configured": "Die Bankverbindung ist noch nicht eingerichtet. Bitte versuchen Sie es später erneut.",
         "too_large": "Die Anfrage ist zu groß.",
         "reservation_success": "Ihre Anfrage wurde angenommen. Die Zahlung ist noch nicht bestätigt. Wir prüfen den Zahlungseingang manuell. Der Termin wird individuell vereinbart.",
         "reversed": " (Umgekehrt)"
@@ -89,6 +80,7 @@ MESSAGES = {
         "reservation_error": "Rezervaci nyní nelze odeslat. Zkuste to prosím později.",
         "send_error": "Odeslání rezervace se nezdařilo. Zkuste to prosím později.",
         "payment_notice": "Platba bude potvrzena až po ruční kontrole připsání peněz.",
+        "payment_not_configured": "Platební údaje zatím nejsou nastaveny. Zkuste to prosím později.",
         "too_large": "Požadavek je příliš velký.",
         "reservation_success": "Vaše poptávka byla přijata. Platba zatím není potvrzena. Připsání peněz ověříme ručně. Termín bude domluven individuálně.",
         "reversed": " (Obrácená)"
@@ -100,6 +92,7 @@ MESSAGES = {
         "reservation_error": "Your request cannot be sent right now. Please try again later.",
         "send_error": "The request could not be sent. Please try again later.",
         "payment_notice": "Payment will only be confirmed after we manually verify that the money has arrived.",
+        "payment_not_configured": "Payment details have not been configured yet. Please try again later.",
         "too_large": "The request is too large.",
         "reservation_success": "Your request has been received. Payment has not yet been confirmed. We will manually verify the incoming payment. The appointment will be arranged individually.",
         "reversed": " (Reversed)"
@@ -866,6 +859,12 @@ def generate_qr():
             "message": MESSAGES[language]["invalid_service"]
         }), 400
 
+    if not REVOLUT_IBAN or not REVOLUT_BIC or not BENEFICIARY_NAME:
+        return jsonify({
+            "status": "error",
+            "message": MESSAGES[language]["payment_not_configured"]
+        }), 503
+
     service = SERVICES[service_id]
 
     amount = Decimal(
@@ -1072,9 +1071,9 @@ def reserve():
     </div>
     """
 
-    if not resend.api_key:
+    if not resend.api_key or not ADMIN_EMAIL or not RESEND_FROM:
         logger.error(
-            "RESEND_API_KEY není nastaven; "
+            "Chybí RESEND_API_KEY, ADMIN_EMAIL nebo RESEND_FROM; "
             "objednávku nelze e-mailem předat administrátorovi."
         )
 
