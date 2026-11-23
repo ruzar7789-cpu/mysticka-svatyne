@@ -416,6 +416,8 @@
         }
 
         .status-message:empty { display:none; }
+        .form-hint { margin-top:8px; color:var(--muted); font-size:11px; line-height:1.6; }
+        .honeypot { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
         .status-message.success { color:var(--success); border-color:var(--success); }
         .status-message.error { color:var(--danger); border-color:var(--danger); }
 
@@ -820,8 +822,27 @@
                     </div>
 
                     <div>
+                        <label for="res-fulfillment" data-i18n="fulfillmentLabel">Gewünschte Erfüllung</label>
+                        <select id="res-fulfillment" required>
+                            <option value="email" data-i18n="fulfillmentEmail">Digitaler Inhalt per E-Mail</option>
+                            <option value="appointment" data-i18n="fulfillmentAppointment">Persönliche Abstimmung / Termin</option>
+                        </select>
+                        <p class="form-hint" data-i18n="fulfillmentHint">Digitale Ausarbeitungen werden nach manueller Zahlungsbestätigung per E-Mail versendet. Persönliche Leistungen stimmen wir individuell mit Ihnen ab.</p>
+                    </div>
+
+                    <div id="appointment-preference-wrap">
+                        <label for="res-preferred-time" data-i18n="preferredTimeLabel">Wunschdatum oder bevorzugte Zeit (optional)</label>
+                        <input type="text" id="res-preferred-time" maxlength="160" autocomplete="off" placeholder="z. B. abends unter der Woche">
+                    </div>
+
+                    <div>
                         <label for="res-note" data-i18n="noteLabel">Notiz / Anliegen</label>
                         <textarea id="res-note" rows="4" maxlength="2000" placeholder="Beschreiben Sie kurz Ihr Anliegen..."></textarea>
+                    </div>
+
+                    <div class="honeypot" aria-hidden="true">
+                        <label for="res-website">Website</label>
+                        <input id="res-website" type="text" tabindex="-1" autocomplete="off">
                     </div>
 
                     <p id="reservation-payment-status" class="payment-status" data-i18n="paymentStatus">
@@ -975,6 +996,11 @@ const LANGUAGE_TEXTS = {
         emailLabel:"Ihre E-Mail-Adresse",
         serviceLabel:"Gewünschte Dienstleistung",
         noteLabel:"Notiz / Anliegen",
+        fulfillmentLabel:"Wie möchten Sie Ihre Leistung erhalten?",
+        fulfillmentEmail:"Digitale Ausarbeitung per E-Mail",
+        fulfillmentAppointment:"Persönliche Abstimmung / Termin",
+        fulfillmentHint:"Digitale Ausarbeitungen werden nach manueller Zahlungsbestätigung per E-Mail versendet. Persönliche Leistungen stimmen wir individuell mit Ihnen ab.",
+        preferredTimeLabel:"Wunschdatum oder bevorzugte Zeit (optional)",
         emailPlaceholder:"you@email.com",
         notePlaceholder:"Beschreiben Sie kurz Ihr Anliegen…",
         paymentStatus:"Bitte zeigen Sie zuerst den Zahlungs-QR-Code für Ihre ausgewählte Dienstleistung an. Danach können Sie Ihre Anfrage senden.",
@@ -1073,6 +1099,11 @@ const LANGUAGE_TEXTS = {
         emailLabel:"Váš e-mail",
         serviceLabel:"Požadovaná služba",
         noteLabel:"Poznámka / záměr",
+        fulfillmentLabel:"Jak si přejete službu obdržet?",
+        fulfillmentEmail:"Digitální výklad e-mailem",
+        fulfillmentAppointment:"Osobní domluva / termín",
+        fulfillmentHint:"Digitální výklady odešleme e-mailem po ručním potvrzení platby. Osobní služby s vámi domluvíme individuálně.",
+        preferredTimeLabel:"Preferovaný termín nebo čas (volitelné)",
         emailPlaceholder:"vas@email.cz",
         notePlaceholder:"Napište krátce o vašem záměru…",
         paymentStatus:"Nejprve si zobrazte platební QR kód pro vybranou službu. Poté můžete odeslat objednávku.",
@@ -1171,6 +1202,11 @@ const LANGUAGE_TEXTS = {
         emailLabel:"Your email",
         serviceLabel:"Requested service",
         noteLabel:"Note / intention",
+        fulfillmentLabel:"How would you like to receive your service?",
+        fulfillmentEmail:"Digital reading by email",
+        fulfillmentAppointment:"Personal arrangement / appointment",
+        fulfillmentHint:"Digital readings are emailed after manual payment confirmation. Personal services are arranged individually with you.",
+        preferredTimeLabel:"Preferred date or time (optional)",
         emailPlaceholder:"you@email.com",
         notePlaceholder:"Briefly describe your intention…",
         paymentStatus:"First display the payment QR code for your selected service. You can then submit your request.",
@@ -1712,11 +1748,17 @@ document.getElementById("reservation-form").addEventListener("submit",async even
     const emailInput = document.getElementById("res-email");
     const serviceSelect = document.getElementById("res-service");
     const noteInput = document.getElementById("res-note");
+    const fulfillmentSelect = document.getElementById("res-fulfillment");
+    const preferredTimeInput = document.getElementById("res-preferred-time");
+    const honeypotInput = document.getElementById("res-website");
     const submitButton = document.getElementById("res-submit-btn");
 
     const email = emailInput.value.trim();
     const service = serviceSelect.value;
     const note = noteInput.value.trim();
+    const fulfillment = fulfillmentSelect.value;
+    const preferredTime = preferredTimeInput.value.trim();
+    const honeypot = honeypotInput.value;
 
     const t = LANGUAGE_TEXTS[currentLanguage];
 
@@ -1746,6 +1788,9 @@ document.getElementById("reservation-form").addEventListener("submit",async even
                 email:email,
                 service:service,
                 note:note,
+                fulfillment:fulfillment,
+                preferred_time:preferredTime,
+                website:honeypot,
                 payment_reference:currentPaymentReference,
                 lang:currentLanguage
             })
@@ -1768,6 +1813,9 @@ document.getElementById("reservation-form").addEventListener("submit",async even
 
         emailInput.value = "";
         noteInput.value = "";
+        preferredTimeInput.value = "";
+        honeypotInput.value = "";
+        fulfillmentSelect.value = "email";
 
         currentPaymentReference = null;
         currentQrServiceId = null;
