@@ -1144,25 +1144,55 @@ def reserve():
             "html": admin_html
         })
 
+        email_copy = {
+            "de": {
+                "subject": "Wir haben Ihre Anfrage erhalten",
+                "title": "Vielen Dank für Ihre Bestellung",
+                "accepted": "Wir haben Ihre Anfrage erhalten und zur Bearbeitung weitergeleitet.",
+                "next": "Nächster Schritt",
+                "payment": "Wir prüfen den Zahlungseingang zunächst manuell. Danach senden wir Ihre digitale Ausarbeitung per E-Mail oder stimmen den persönlichen Termin individuell mit Ihnen ab.",
+                "notice": "Diese Nachricht bestätigt den Eingang Ihrer Anfrage, nicht den Zahlungseingang und keine verbindliche Terminreservierung.",
+                "closing": "Herzliche Grüße"
+            },
+            "cs": {
+                "subject": "Potvrzení přijetí objednávky",
+                "title": "Děkujeme za vaši objednávku",
+                "accepted": "Vaši poptávku jsme přijali a předali ke zpracování.",
+                "next": "Další postup",
+                "payment": "Nejprve ručně ověříme připsání platby. Poté vám digitální výklad zašleme e-mailem, nebo s vámi individuálně domluvíme osobní termín.",
+                "notice": "Tato zpráva potvrzuje přijetí poptávky, nikoli přijetí platby ani závaznou rezervaci termínu.",
+                "closing": "S přáním krásného dne"
+            },
+            "en": {
+                "subject": "We received your request",
+                "title": "Thank you for your order",
+                "accepted": "We have received your request and sent it for processing.",
+                "next": "What happens next",
+                "payment": "We will first verify the payment manually. Then we will email your digital reading or contact you to arrange a personal appointment.",
+                "notice": "This message confirms receipt of your request, not receipt of payment or a confirmed appointment.",
+                "closing": "Warm regards"
+            }
+        }[language]
+
         customer_html = f"""
         <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;padding:28px;background:#10091b;color:#f3e8ff;line-height:1.7">
             <p style="color:#d4af37;letter-spacing:3px">MYSTICKÁ SVATYNĚ</p>
-            <h2 style="color:#f0d99b">Děkujeme za vaši objednávku</h2>
-            <p>Vaši poptávku jsme přijali a předali ke zpracování.</p>
-            <p><strong>Objednávka:</strong> {safe_reservation_reference}<br>
-            <strong>Služba:</strong> {safe_service_title}<br>
-            <strong>Cena:</strong> {safe_price}<br>
-            <strong>Reference platby:</strong> {safe_payment_line}</p>
-            <p><strong>Další postup:</strong> {safe_fulfillment}. Platbu nejprve ručně ověříme. Poté vám digitální výstup zašleme na tento e-mail, nebo se vám ozveme k individuální domluvě termínu.</p>
-            <p style="color:#c8b9d8;font-size:13px">Tato zpráva potvrzuje přijetí poptávky, nikoli přijetí platby ani rezervaci konkrétního termínu.</p>
-            <p>S přáním krásného dne,<br><strong>Mystická Svatyně</strong></p>
+            <h2 style="color:#f0d99b">{email_copy["title"]}</h2>
+            <p>{email_copy["accepted"]}</p>
+            <p><strong>Order:</strong> {safe_reservation_reference}<br>
+            <strong>Service:</strong> {safe_service_title}<br>
+            <strong>Price:</strong> {safe_price}<br>
+            <strong>Payment reference:</strong> {safe_payment_line}</p>
+            <p><strong>{email_copy["next"]}:</strong> {email_copy["payment"]}</p>
+            <p style="color:#c8b9d8;font-size:13px">{email_copy["notice"]}</p>
+            <p>{email_copy["closing"]},<br><strong>Mystická Svatyně</strong></p>
         </div>
         """
 
         resend.Emails.send({
             "from": RESEND_FROM,
             "to": [email],
-            "subject": f"Potvrzení přijetí objednávky {reservation_reference}",
+            "subject": f"{email_copy['subject']} — {reservation_reference}",
             "html": customer_html
         })
 
