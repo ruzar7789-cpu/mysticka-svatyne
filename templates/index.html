@@ -830,7 +830,7 @@
                         <p class="form-hint" data-i18n="fulfillmentHint">Digitale Ausarbeitungen werden nach manueller Zahlungsbestätigung per E-Mail versendet. Persönliche Leistungen stimmen wir individuell mit Ihnen ab.</p>
                     </div>
 
-                    <div id="appointment-preference-wrap">
+                    <div id="appointment-preference-wrap" hidden>
                         <label for="res-preferred-time" data-i18n="preferredTimeLabel">Wunschdatum oder bevorzugte Zeit (optional)</label>
                         <input type="text" id="res-preferred-time" maxlength="160" autocomplete="off" placeholder="z. B. abends unter der Woche">
                     </div>
@@ -1670,6 +1670,16 @@ document.getElementById("res-service").addEventListener("change",() => {
     updatePaymentStatus(LANGUAGE_TEXTS[currentLanguage].paymentStatus);
     clearReservationMessage();
 });
+
+const fulfillmentSelect = document.getElementById("res-fulfillment");
+const appointmentPreferenceWrap = document.getElementById("appointment-preference-wrap");
+
+function updateFulfillmentFields() {
+    appointmentPreferenceWrap.hidden = fulfillmentSelect.value !== "appointment";
+}
+
+fulfillmentSelect.addEventListener("change",updateFulfillmentFields);
+updateFulfillmentFields();
 
 
 /* =========================================================
